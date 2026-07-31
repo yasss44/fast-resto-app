@@ -1,0 +1,63 @@
+# Codemagic — build iOS + upload TestFlight (no Mac required)
+# Setup: https://codemagic.io → connect repo → add Apple Developer integration
+#
+# Required in Codemagic UI (Team settings → Integrations):
+#   - App Store Connect API key (Issuer ID, Key ID, .p8 file)
+#   - Apple Developer Portal connection (for code signing)
+#
+# Required in Codemagic UI (this app → Environment variables):
+#   APP_STORE_APPLE_ID = numeric App ID from App Store Connect (e.g. 1234567890)
+
+workflows:
+  ios-testflight:
+    name: FAST iOS TestFlight
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.fast.resto.fastRestoBigbonney
+      vars:
+        BUNDLE_ID: com.fast.resto.fastRestoBigbonney
+        XCODE_WORKSPACE: ios/Runner.xcworkspace
+        XCODE_SCHEME: Runner
+
+    scripts:
+      - name: Install dependencies
+        script: flutter pub get
+
+      - name: Install CocoaPods
+        script: |
+          cd ios
+          pod install
+
+      - name: Set build number from App Store Connect
+        script: |
+          if [ -n "$APP_STORE_APPLE_ID" ]; then
+            LATEST=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID" || echo "0")
+            NEXT=$((LATEST + 1))
+            echo "Build number: $NEXT"
+            flutter build ipa --release \
+              --build-name=1.0.0 \
+              --build-number=$NEXT \
+              --export-options-plist=ios/ExportOptions.plist
+          else
+            echo "APP_STORE_APPLE_ID not set — using pubspec build number"
+            flutter build ipa --release \
+              --export-options-plist=ios/ExportOptions.plist
+          fi
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        beta_groups:
+          - App Store Connect Users

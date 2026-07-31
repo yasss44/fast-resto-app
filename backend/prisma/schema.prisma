@@ -1,0 +1,392 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum DietaryOption {
+  VEGAN
+  VEGETARIAN
+  GLUTEN_FREE
+  HALAL
+  KETO
+  DAIRY_FREE
+}
+
+enum FulfillmentType {
+  PICKUP
+  DELIVERY
+}
+
+enum OrderStatus {
+  PLACED
+  PREPARING
+  READY_FOR_PICKUP
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum NotificationType {
+  STATUS
+  INFO
+  SUCCESS
+  RATING
+}
+
+enum UserRole {
+  CLIENT
+  RESTAURANT
+  LIVREUR
+  ADMIN
+}
+
+enum GroupOrderStatus {
+  OPEN
+  LOCKED
+  SUBMITTED
+  COMPLETED
+  CANCELLED
+}
+
+enum GroupMemberPaymentStatus {
+  DRAFT
+  READY
+  PAID
+}
+
+enum DriverType {
+  OCCASIONAL
+  PERMANENT
+}
+
+enum DeliveryStatus {
+  AVAILABLE
+  ACCEPTED
+  AT_RESTAURANT
+  PICKED_UP
+  DELIVERED
+  CANCELLED
+}
+
+// ─── Auth / Users ───────────────────────────────────────────
+
+model User {
+  id                  String    @id @default(cuid())
+  email               String    @unique
+  password            String
+  name                String
+  phone               String?
+  role                UserRole  @default(CLIENT)
+  points              Int       @default(0)
+  tokenVersion        Int       @default(0)
+  failedLoginAttempts Int       @default(0)
+  lockedUntil         DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  orders           Order[]
+  reviews          Review[]
+  notifications    Notification[]
+  restaurant       Restaurant?    @relation("RestaurantOwner")
+  groupMemberships GroupMember[]
+  hostedGroups     GroupOrder[]   @relation("GroupHost")
+  deliveries       Delivery[]
+  driverProfile    DriverProfile?
+}
+
+// ─── Restaurants ────────────────────────────────────────────
+
+model Restaurant {
+  id                   String   @id @default(cuid())
+  ownerId              String   @unique
+  name                 String
+  description          String   @default("")
+  image                String   @default("")
+  category             String   @default("")
+  address              String   @default("")
+  city                 String   @default("")
+  cuisineType          String   @default("")
+  managerIban          String   @default("")
+  stripeAccountId      String?
+  stripeChargesEnabled Boolean  @default(false)
+  stripePayoutsEnabled Boolean  @default(false)
+  rating               Float    @default(0.0)
+  reviewsCount         Int      @default(0)
+  pickupPrepTime       Int      @default(15)
+  normalPrepTime       Int      @default(15)
+  rushPrepTime         Int      @default(25)
+  distance             Float    @default(1.0)
+  latitude             Float    @default(48.8566)
+  longitude            Float    @default(2.3522)
+  isActive             Boolean  @default(true)
+  isRushMode           Boolean  @default(false)
+  deliveryEnabled      Boolean  @default(true)
+  deliveryFee          Float    @default(2.99)
+  deliveryRadiusKm     Float    @default(5.0)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  owner          User                      @relation("RestaurantOwner", fields: [ownerId], references: [id])
+  menuItems      MenuItem[]
+  reviews        Review[]
+  orders         Order[]
+  dietaryOptions RestaurantDietaryOption[]
+  groupOrders    GroupOrder[]
+}
+
+model RestaurantDietaryOption {
+  restaurantId String
+  option       DietaryOption
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@id([restaurantId, option])
+}
+
+// ─── Menu ───────────────────────────────────────────────────
+
+model MenuItem {
+  id           String   @id @default(cuid())
+  restaurantId String
+  name         String
+  description  String   @default("")
+  price        Float
+  image        String   @default("")
+  category     String   @default("")
+  rating       Float    @default(0.0)
+  isAvailable  Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  restaurant  Restaurant              @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  dietaryTags MenuItemDietaryOption[]
+  supplements MenuItemSupplement[]
+  cartItems   CartItem[]
+}
+
+model MenuItemSupplement {
+  id         String @id @default(cuid())
+  menuItemId String
+  name       String
+  price      Float
+
+  menuItem MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+}
+
+model MenuItemDietaryOption {
+  menuItemId String
+  option     DietaryOption
+
+  menuItem MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+
+  @@id([menuItemId, option])
+}
+
+// ─── Orders ─────────────────────────────────────────────────
+
+model Order {
+  id                         String        @id @default(cuid())
+  restaurantId               String
+  userId                     String
+  status                     OrderStatus   @default(PLACED)
+  paymentStatus              PaymentStatus @default(PENDING)
+  subtotal                   Float
+  serviceFee                 Float         @default(1.50)
+  deliveryFee                Float         @default(0)
+  total                      Float
+  fulfillmentType            FulfillmentType @default(PICKUP)
+  deliveryAddress            String        @default("")
+  deliveryLatitude           Float?
+  deliveryLongitude          Float?
+  stripeCheckoutSessionId    String?
+  stripePaymentIntentId      String?
+  stripeTransferId           String?
+  stripeApplicationFeeAmount Int           @default(0)
+  stripeRestaurantAmount     Int           @default(0)
+  paidAt                     DateTime?
+  groupOrderId               String?
+  userWalkTimeMin            Int           @default(10)
+  isReadyAtEntrance          Boolean       @default(false)
+  ratingSubmitted            Boolean       @default(false)
+  prepStartedAt              DateTime?
+  prepTimerSeconds           Int           @default(0)
+  gpsProgress                Float         @default(0.0)
+  pickupToken                String?       @unique
+  isBilledAnyway             Boolean       @default(false)
+  isUrgent                   Boolean       @default(false)
+  createdAt                  DateTime      @default(now())
+  updatedAt                  DateTime      @updatedAt
+
+  restaurant    Restaurant     @relation(fields: [restaurantId], references: [id])
+  user          User           @relation(fields: [userId], references: [id])
+  items         CartItem[]
+  groupOrder    GroupOrder?    @relation(fields: [groupOrderId], references: [id])
+  reviews       Review[]
+  notifications Notification[]
+  delivery      Delivery?
+}
+
+model CartItem {
+  id              String @id @default(cuid())
+  orderId         String
+  menuItemId      String
+  quantity        Int
+  selectedOptions String @default("") // JSON array string
+  allergyNotes    String @default("")
+
+  order    Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItem MenuItem @relation(fields: [menuItemId], references: [id])
+}
+
+model PaymentCheckout {
+  id                      String   @id @default(cuid())
+  userId                  String
+  restaurantId            String
+  itemsJson               String
+  userWalkTimeMin         Int      @default(10)
+  fulfillmentType         FulfillmentType @default(PICKUP)
+  deliveryAddress         String   @default("")
+  deliveryLatitude        Float?
+  deliveryLongitude       Float?
+  deliveryFee             Float    @default(0)
+  subtotal                Float
+  serviceFee              Float
+  total                   Float
+  stripeCheckoutSessionId String?  @unique
+  createdOrderId          String?
+  groupOrderId            String?
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  groupOrder GroupOrder? @relation(fields: [groupOrderId], references: [id])
+}
+
+// ─── Reviews ────────────────────────────────────────────────
+
+model Review {
+  id           String   @id @default(cuid())
+  restaurantId String
+  userId       String
+  orderId      String?
+  userName     String
+  rating       Float
+  comment      String   @default("")
+  createdAt    DateTime @default(now())
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  user       User       @relation(fields: [userId], references: [id])
+  order      Order?     @relation(fields: [orderId], references: [id])
+
+  @@unique([userId, orderId])
+}
+
+// ─── Notifications ──────────────────────────────────────────
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  orderId   String?
+  title     String
+  body      String
+  type      NotificationType @default(INFO)
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order Order? @relation(fields: [orderId], references: [id])
+}
+
+// ─── Group Orders ───────────────────────────────────────────
+
+model GroupOrder {
+  id           String           @id @default(cuid())
+  code         String           @unique
+  hostUserId   String
+  restaurantId String
+  status       GroupOrderStatus @default(OPEN)
+  submittedAt  DateTime?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  host       User              @relation("GroupHost", fields: [hostUserId], references: [id])
+  restaurant Restaurant        @relation(fields: [restaurantId], references: [id])
+  members    GroupMember[]
+  orders     Order[]
+  checkouts  PaymentCheckout[]
+}
+
+model GroupMember {
+  id            String                   @id @default(cuid())
+  groupId       String
+  userId        String
+  itemsCount    Int                      @default(0)
+  total         Float                    @default(0.0)
+  cartItemsJson String                   @default("")
+  isReady       Boolean                  @default(false)
+  paymentStatus GroupMemberPaymentStatus @default(DRAFT)
+  role          String                   @default("MEMBER") // HOST or MEMBER
+  createdAt     DateTime                 @default(now())
+
+  group GroupOrder @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user  User       @relation(fields: [userId], references: [id])
+
+  @@unique([groupId, userId])
+}
+
+// ─── Deliveries / Livreur ───────────────────────────────────
+
+model DriverProfile {
+  id        String     @id @default(cuid())
+  userId    String     @unique
+  type      DriverType
+  isOnline  Boolean    @default(false)
+  isPaused  Boolean    @default(false)
+  timezone  String     @default("Europe/Paris")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  schedules DriverSchedule[]
+}
+
+model DriverSchedule {
+  id              String  @id @default(cuid())
+  driverProfileId String
+  dayOfWeek       Int
+  startMinute     Int
+  endMinute       Int
+  isEnabled       Boolean @default(true)
+
+  driverProfile DriverProfile @relation(fields: [driverProfileId], references: [id], onDelete: Cascade)
+
+  @@index([driverProfileId, dayOfWeek])
+}
+
+model Delivery {
+  id             String         @id @default(cuid())
+  orderId        String?        @unique
+  driverId       String?
+  status         DeliveryStatus @default(AVAILABLE)
+  gain           Float          @default(0.0)
+  restaurantId   String?
+  restaurantName String         @default("")
+  destination    String         @default("")
+  distance       String         @default("")
+  createdAt      DateTime       @default(now())
+  acceptedAt     DateTime?
+  completedAt    DateTime?
+
+  order  Order? @relation(fields: [orderId], references: [id])
+  driver User?  @relation(fields: [driverId], references: [id])
+}
