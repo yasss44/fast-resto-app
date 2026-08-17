@@ -40,12 +40,22 @@ class _GroupScreenState extends State<GroupScreen> {
     try {
       final provider = context.read<FASTProvider>();
       if (provider.activeGroupId != null) {
-        await _refresh(provider.activeGroupId!);
-      } else {
-        final groups = await _service.getMyGroups();
-        if (groups.isNotEmpty) {
-          await _setGroup(Map<String, dynamic>.from(groups.first as Map));
+        final g = await _service.getGroup(provider.activeGroupId!);
+        final status = g['status'] as String? ?? '';
+        if (status == 'OPEN' || status == 'LOCKED') {
+          await _setGroup(g);
+          return;
+        } else {
+          provider.clearActiveGroup();
         }
+      }
+      final groups = await _service.getMyGroups();
+      final active = groups.firstWhere(
+        (g) => g['status'] == 'OPEN' || g['status'] == 'LOCKED',
+        orElse: () => <String, dynamic>{},
+      );
+      if (active.isNotEmpty) {
+        await _setGroup(Map<String, dynamic>.from(active));
       }
     } catch (_) {
       // No active group is a valid empty state.

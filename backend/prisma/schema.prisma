@@ -113,6 +113,7 @@ model Restaurant {
   name                 String
   description          String   @default("")
   image                String   @default("")
+  logo                 String   @default("")
   category             String   @default("")
   address              String   @default("")
   city                 String   @default("")

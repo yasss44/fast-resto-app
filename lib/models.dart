@@ -213,6 +213,7 @@ class Restaurant {
   final String name;
   final String description;
   final String image;
+  final String logo;
   final String category;
   final double rating;
   final int reviewsCount;
@@ -233,6 +234,7 @@ class Restaurant {
     required this.name,
     required this.description,
     required this.image,
+    String? logo,
     required this.category,
     required this.rating,
     required this.reviewsCount,
@@ -247,13 +249,24 @@ class Restaurant {
     this.deliveryEnabled = true,
     this.deliveryFee = 2.99,
     this.deliveryRadiusKm = 5.0,
-  });
+  }) : logo = (logo != null && logo.isNotEmpty) ? logo : _getDefaultLogo(category, image);
+
+  static String _getDefaultLogo(String cat, String fallbackImg) {
+    final c = cat.toLowerCase();
+    if (c.contains('burger')) return 'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=200&q=80';
+    if (c.contains('pizza')) return 'https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?auto=format&fit=crop&w=200&q=80';
+    if (c.contains('sushi')) return 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=200&q=80';
+    if (c.contains('taco') || c.contains('mexic')) return 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=200&q=80';
+    if (c.contains('salad') || c.contains('health')) return 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=200&q=80';
+    return fallbackImg.isNotEmpty ? fallbackImg : 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=200&q=80';
+  }
 
   Map<String, dynamic> toJson() => {
         'id': id,
         'name': name,
         'description': description,
         'image': image,
+        'logo': logo,
         'category': category,
         'rating': rating,
         'reviewsCount': reviewsCount,
@@ -272,6 +285,7 @@ class Restaurant {
         name: json['name'] as String,
         description: json['description'] as String,
         image: json['image'] as String,
+        logo: json['logo'] as String?,
         category: json['category'] as String,
         rating: (json['rating'] as num).toDouble(),
         reviewsCount: json['reviewsCount'] as int? ?? 0,
@@ -304,6 +318,7 @@ class Restaurant {
         name: json['name'] as String,
         description: json['description'] as String,
         image: json['image'] as String? ?? '',
+        logo: json['logo'] as String?,
         category: json['category'] as String,
         rating: (json['rating'] as num).toDouble(),
         reviewsCount: json['reviewsCount'] as int? ?? 0,

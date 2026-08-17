@@ -771,6 +771,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Restaurant card widget
   Widget _buildRestaurantCard(BuildContext context, FASTProvider provider, Restaurant rest) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF18181B) : Colors.white;
+    final cardBorder = isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0);
+    final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final subColor = isDark ? const Color(0xFF71717A) : const Color(0xFF64748B);
+    final badgeBg = isDark ? const Color(0xFF09090B) : const Color(0xFFF1F5F9);
+    final tagBorder = isDark ? const Color(0xFF3F3F46) : const Color(0xFFCBD5E1);
+
     return GestureDetector(
       onTap: () {
         provider.selectRestaurant(rest.id);
@@ -779,9 +787,18 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Container(
         margin: const EdgeInsets.only(bottom: 20),
         decoration: BoxDecoration(
-          color: const Color(0xFF18181B),
+          color: cardBg,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFF27272A)),
+          border: Border.all(color: cardBorder),
+          boxShadow: isDark
+              ? null
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
         ),
         clipBehavior: Clip.antiAlias,
         child: Column(
@@ -797,7 +814,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) => Container(
                     height: 180,
-                    color: const Color(0xFF27272A),
+                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
                   ),
                 ),
                 // Bottom gradient fade into card color
@@ -849,7 +866,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF09090B),
+                      color: isDark ? const Color(0xFF09090B) : Colors.black.withValues(alpha: 0.75),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Row(
@@ -866,7 +883,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        const Icon(Icons.location_on_rounded, color: Color(0xFF71717A), size: 12),
+                        const Icon(Icons.location_on_rounded, color: Color(0xFFA1A1AA), size: 12),
                         const SizedBox(width: 2),
                         Text(
                           '${provider.getRealDistance(rest).toStringAsFixed(1)} km',
@@ -882,22 +899,52 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
-            // Text info row
+            // Text info row with Restaurant Logo Avatar
             Padding(
               padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Restaurant Logo Avatar
+                  Container(
+                    width: 44,
+                    height: 44,
+                    margin: const EdgeInsets.only(right: 12),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFCBD5E1),
+                        width: 1.5,
+                      ),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: Image.network(
+                      rest.logo,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        color: const Color(0xFFF59E0B),
+                        child: Center(
+                          child: Text(
+                            rest.name.isNotEmpty ? rest.name[0].toUpperCase() : 'R',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w900,
+                              color: Color(0xFF09090B),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           rest.name,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.w800,
                             fontSize: 15,
-                            color: Colors.white,
+                            color: titleColor,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -905,9 +952,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(height: 4),
                         Text(
                           rest.description,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
-                            color: Color(0xFF71717A),
+                            color: subColor,
                             height: 1.3,
                           ),
                           maxLines: 1,
@@ -921,16 +968,16 @@ class _HomeScreenState extends State<HomeScreen> {
                               return Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF09090B),
+                                  color: badgeBg,
                                   borderRadius: BorderRadius.circular(6),
-                                  border: Border.all(color: const Color(0xFF3F3F46)),
+                                  border: Border.all(color: tagBorder),
                                 ),
                                 child: Text(
                                   tag.label,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 10,
                                     fontWeight: FontWeight.w600,
-                                    color: Color(0xFF71717A),
+                                    color: subColor,
                                   ),
                                 ),
                               );

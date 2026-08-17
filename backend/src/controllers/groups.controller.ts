@@ -112,6 +112,7 @@ export const getMyGroups = async (req: Request, res: Response): Promise<void> =>
       members: {
         some: { userId: req.user!.userId },
       },
+      status: { in: ['OPEN', 'LOCKED'] },
     },
     include: safeGroupInclude,
     orderBy: { createdAt: 'desc' },
@@ -155,13 +156,14 @@ export const leaveGroup = async (req: Request, res: Response): Promise<void> => 
   });
 
   if (!group) {
-    res.status(404).json({ error: 'Groupe introuvable' });
+    // Already deleted or gone
+    res.json({ message: 'Vous avez quitté le groupe' });
     return;
   }
 
   const member = group.members.find((m) => m.userId === req.user!.userId);
   if (!member) {
-    res.status(400).json({ error: 'Vous n\'êtes pas membre de ce groupe' });
+    res.json({ message: 'Vous n\'êtes plus membre de ce groupe' });
     return;
   }
 
@@ -173,22 +175,17 @@ export const leaveGroup = async (req: Request, res: Response): Promise<void> => 
       res.status(409).json({ error: 'Le groupe ne peut plus être annulé après un paiement' });
       return;
     }
-    if (!['OPEN', 'LOCKED'].includes(group.status)) {
-      res.status(409).json({ error: 'Ce groupe ne peut plus être annulé' });
-      return;
-    }
+    // Delete member & set status to CANCELLED
+    await prisma.groupMember.delete({ where: { id: member.id } }).catch(() => {});
     await prisma.groupOrder.update({
       where: { id },
       data: { status: 'CANCELLED' },
-    });
+    }).catch(() => {});
+
     res.json({ message: 'Groupe annulé' });
     return;
   }
 
-  if (group.status !== 'OPEN') {
-    res.status(409).json({ error: 'Vous ne pouvez quitter qu’un groupe ouvert' });
-    return;
-  }
   if (member.paymentStatus === 'PAID') {
     res.status(409).json({ error: 'Vous ne pouvez plus quitter le groupe après votre paiement' });
     return;
@@ -196,7 +193,7 @@ export const leaveGroup = async (req: Request, res: Response): Promise<void> => 
 
   await prisma.groupMember.delete({
     where: { id: member.id },
-  });
+  }).catch(() => {});
 
   res.json({ message: 'Vous avez quitté le groupe' });
 };

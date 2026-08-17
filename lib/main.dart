@@ -353,9 +353,10 @@ class _MainShellState extends State<MainShell> with SingleTickerProviderStateMix
         break;
     }
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF09090B).withValues(alpha: 0.95),
+        backgroundColor: isDark ? const Color(0xFF09090B).withValues(alpha: 0.95) : Colors.white.withValues(alpha: 0.95),
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         titleSpacing: 16,
@@ -388,13 +389,13 @@ class _MainShellState extends State<MainShell> with SingleTickerProviderStateMix
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'FAST',
                     style: TextStyle(
                       fontWeight: FontWeight.w900,
                       fontSize: 16,
                       letterSpacing: 1.2,
-                      color: Colors.white,
+                      color: isDark ? Colors.white : const Color(0xFF0F172A),
                     ),
                   ),
                   Row(
@@ -629,9 +630,9 @@ class _MainShellState extends State<MainShell> with SingleTickerProviderStateMix
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFF121214),
-          border: const Border(
-            top: BorderSide(color: Color(0xFF27272A), width: 1),
+          color: isDark ? const Color(0xFF121214) : Colors.white,
+          border: Border(
+            top: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0), width: 1),
           ),
         ),
         child: SafeArea(
@@ -749,6 +750,8 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final unselectedColor = isDark ? const Color(0xFF71717A) : const Color(0xFF64748B);
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -772,7 +775,7 @@ class _NavItem extends StatelessWidget {
                   Icon(
                     icon,
                     size: 22,
-                    color: isActive ? const Color(0xFFF59E0B) : const Color(0xFF71717A),
+                    color: isActive ? const Color(0xFFF59E0B) : unselectedColor,
                   ),
                   if (badge != null)
                     Positioned(
@@ -818,7 +821,7 @@ class _NavItem extends StatelessWidget {
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                color: isActive ? const Color(0xFFF59E0B) : const Color(0xFF71717A),
+                color: isActive ? const Color(0xFFF59E0B) : unselectedColor,
               ),
             ),
           ],
