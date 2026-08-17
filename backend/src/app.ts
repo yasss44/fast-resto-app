@@ -70,16 +70,16 @@ if (env.nodeEnv === 'production') {
 // ─── Rate Limiting ──────────────────────────────────────────
 
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: env.nodeEnv === 'development' ? 500 : 50,
-  message: { error: 'Trop de tentatives. Réessayez dans 15 minutes.' },
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 300, // 300 attempts per minute
+  message: { error: 'Trop de tentatives. Réessayez dans 1 minute.' },
   standardHeaders: true,
   legacyHeaders: false,
 });
 
 const apiLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  max: env.nodeEnv === 'development' ? 1000 : 300,
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 1000, // 1000 requests per minute
   message: { error: 'Trop de requêtes. Réessayez plus tard.' },
   standardHeaders: true,
   legacyHeaders: false,
