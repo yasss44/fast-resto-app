@@ -25,9 +25,9 @@ class RestaurantScreen extends StatelessWidget {
         // Restaurant Banner Header
         Stack(
           children: [
-            Image.network(
-              rest.image,
-              height: 160,
+              Image.network(
+                rest.image,
+                height: 220,
               width: double.infinity,
               cacheWidth: 500,
               fit: BoxFit.cover,
@@ -103,7 +103,7 @@ class RestaurantScreen extends StatelessWidget {
                   Text(
                     rest.name,
                     style: const TextStyle(
-                      fontSize: 18,
+                      fontSize: 22,
                       fontWeight: FontWeight.w900,
                       color: Colors.white,
                     ),
@@ -374,10 +374,11 @@ class RestaurantScreen extends StatelessWidget {
     return InkWell(
       onTap: () => _showAddToCartDialog(context, provider, item),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Left: text content
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -385,35 +386,52 @@ class RestaurantScreen extends StatelessWidget {
                   Text(
                     item.name,
                     style: const TextStyle(
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w700,
                       fontSize: 14,
                       color: Colors.white,
+                      height: 1.2,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 5),
                   Text(
                     item.description,
                     style: const TextStyle(
-                      fontSize: 11,
-                      color: Color(0xFFA1A1AA),
+                      fontSize: 12,
+                      color: Color(0xFF71717A),
                       height: 1.4,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '€${item.price.toStringAsFixed(2)}',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 13,
-                      color: Color(0xFFF59E0B),
-                    ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Text(
+                        '€${item.price.toStringAsFixed(2)}',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w900,
+                          fontSize: 15,
+                          color: Color(0xFFF59E0B),
+                        ),
+                      ),
+                      if (item.supplements.isNotEmpty) ...[
+                        const SizedBox(width: 8),
+                        const Text(
+                          'Extras dispo.',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Color(0xFF71717A),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 14),
+            // Right: image with add button
             Stack(
               clipBehavior: Clip.none,
               children: [
@@ -421,28 +439,32 @@ class RestaurantScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                   child: Image.network(
                     item.image,
-                    width: 72,
-                    height: 72,
-                    cacheWidth: 72,
-                    cacheHeight: 72,
+                    width: 90,
+                    height: 90,
                     fit: BoxFit.cover,
-                    filterQuality: FilterQuality.low,
+                    filterQuality: FilterQuality.medium,
                     errorBuilder: (context, error, stackTrace) => Container(
-                      width: 72,
-                      height: 72,
-                      color: const Color(0xFF27272A),
+                      width: 90,
+                      height: 90,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF27272A),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.restaurant, color: Color(0xFF3F3F46), size: 28),
                     ),
                   ),
                 ),
-                const Positioned(
-                  bottom: -6,
-                  right: -6,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
+                Positioned(
+                  bottom: -8,
+                  right: -8,
+                  child: Container(
+                    width: 28,
+                    height: 28,
+                    decoration: const BoxDecoration(
                       color: Color(0xFFF59E0B),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(Icons.add, color: Color(0xFF09090B), size: 20),
+                    child: const Icon(Icons.add_rounded, color: Color(0xFF09090B), size: 18),
                   ),
                 ),
               ],

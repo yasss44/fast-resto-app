@@ -397,13 +397,24 @@ class _MainShellState extends State<MainShell> with SingleTickerProviderStateMix
                       color: Colors.white,
                     ),
                   ),
-                  const Text(
-                    'Chaque minute conte',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFFF59E0B),
-                    ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.location_on_rounded,
+                        color: Color(0xFFF59E0B),
+                        size: 11,
+                      ),
+                      const SizedBox(width: 2),
+                      const Text(
+                        'Paris, France',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFFF59E0B),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -617,99 +628,48 @@ class _MainShellState extends State<MainShell> with SingleTickerProviderStateMix
         ],
       ),
       bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          border: Border(
+        decoration: BoxDecoration(
+          color: const Color(0xFF121214),
+          border: const Border(
             top: BorderSide(color: Color(0xFF27272A), width: 1),
           ),
         ),
-        child: BottomNavigationBar(
-          currentIndex: _getBottomNavIndex(provider.currentScreen),
-          onTap: (index) {
-            final screen = _getScreenFromIndex(index);
-            provider.navigateToScreen(screen);
-          },
-          backgroundColor: const Color(0xFF121214),
-          selectedItemColor: const Color(0xFFF59E0B),
-          unselectedItemColor: const Color(0xFF71717A),
-          type: BottomNavigationBarType.fixed,
-          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 10),
-          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 10),
-          items: [
-            const BottomNavigationBarItem(
-              icon: Padding(
-                padding: EdgeInsets.only(bottom: 4),
-                child: Icon(Icons.restaurant),
-              ),
-              label: 'Restaurants',
-            ),
-            BottomNavigationBarItem(
-              icon: Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Stack(
-                  children: [
-                    const Icon(Icons.shopping_bag_outlined),
-                    if (provider.cartCount > 0)
-                      Positioned(
-                        right: 0,
-                        top: 0,
-                        child: Container(
-                          padding: const EdgeInsets.all(2),
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFEF4444),
-                            shape: BoxShape.circle,
-                          ),
-                          constraints: const BoxConstraints(
-                            minWidth: 14,
-                            minHeight: 14,
-                          ),
-                          child: Text(
-                            '${provider.cartCount}',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 8,
-                              fontWeight: FontWeight.w900,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                  ],
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _NavItem(
+                  icon: Icons.storefront_rounded,
+                  label: 'Restaurants',
+                  isActive: _getBottomNavIndex(provider.currentScreen) == 0,
+                  onTap: () => provider.navigateToScreen('home'),
                 ),
-              ),
-              label: 'Panier',
-            ),
-            BottomNavigationBarItem(
-              icon: Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Stack(
-                  children: [
-                    const Icon(Icons.assignment_outlined),
-                    if (provider.orders.any((o) => o.status != OrderStatus.completed && o.status != OrderStatus.cancelled))
-                      Positioned(
-                        right: 0,
-                        top: 0,
-                        child: Container(
-                          width: 8,
-                          height: 8,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFEF4444),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      ),
-                  ],
+                _NavItem(
+                  icon: Icons.shopping_bag_rounded,
+                  label: 'Panier',
+                  isActive: _getBottomNavIndex(provider.currentScreen) == 1,
+                  badge: provider.cartCount > 0 ? '${provider.cartCount}' : null,
+                  onTap: () => provider.navigateToScreen('cart'),
                 ),
-              ),
-              label: 'Commandes',
+                _NavItem(
+                  icon: Icons.receipt_long_rounded,
+                  label: 'Commandes',
+                  isActive: _getBottomNavIndex(provider.currentScreen) == 2,
+                  hasDot: provider.orders.any((o) => o.status != OrderStatus.completed && o.status != OrderStatus.cancelled),
+                  onTap: () => provider.navigateToScreen('commandes'),
+                ),
+                _NavItem(
+                  icon: Icons.group_rounded,
+                  label: 'Groupe',
+                  isActive: _getBottomNavIndex(provider.currentScreen) == 3,
+                  onTap: () => provider.navigateToScreen('group'),
+                ),
+              ],
             ),
-            const BottomNavigationBarItem(
-              icon: Padding(
-                padding: EdgeInsets.only(bottom: 4),
-                child: Icon(Icons.group_outlined),
-              ),
-              label: 'Groupe',
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -731,20 +691,6 @@ class _MainShellState extends State<MainShell> with SingleTickerProviderStateMix
     }
   }
 
-  String _getScreenFromIndex(int index) {
-    switch (index) {
-      case 0:
-        return 'home';
-      case 1:
-        return 'cart';
-      case 2:
-        return 'commandes';
-      case 3:
-        return 'group';
-      default:
-        return 'home';
-    }
-  }
 
 }
 
@@ -784,3 +730,100 @@ class _DriverShellState extends State<DriverShell> {
   }
 }
 
+class _NavItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool isActive;
+  final String? badge;
+  final bool hasDot;
+  final VoidCallback onTap;
+
+  const _NavItem({
+    required this.icon,
+    required this.label,
+    required this.isActive,
+    required this.onTap,
+    this.badge,
+    this.hasDot = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        width: 72,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              decoration: BoxDecoration(
+                color: isActive
+                    ? const Color(0xFFF59E0B).withValues(alpha: 0.15)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Icon(
+                    icon,
+                    size: 22,
+                    color: isActive ? const Color(0xFFF59E0B) : const Color(0xFF71717A),
+                  ),
+                  if (badge != null)
+                    Positioned(
+                      right: -8,
+                      top: -6,
+                      child: Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFEF4444),
+                          shape: BoxShape.circle,
+                        ),
+                        constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
+                        child: Text(
+                          badge!,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 8,
+                            fontWeight: FontWeight.w900,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                  if (hasDot && badge == null)
+                    Positioned(
+                      right: -4,
+                      top: -2,
+                      child: Container(
+                        width: 7,
+                        height: 7,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFEF4444),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 3),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                color: isActive ? const Color(0xFFF59E0B) : const Color(0xFF71717A),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

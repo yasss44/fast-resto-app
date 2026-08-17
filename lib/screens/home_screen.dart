@@ -332,12 +332,11 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                'PARCOURIR PAR CATÉGORIE',
+                'Catégories',
                 style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.0,
-                  color: Color(0xFF71717A),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
                 ),
               ),
               if (provider.selectedCategory != 'all')
@@ -367,12 +366,11 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                'CUISINES À PROXIMITÉ',
+                'Restaurants',
                 style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.0,
-                  color: Color(0xFF71717A),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
                 ),
               ),
               Text(
@@ -726,63 +724,44 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Categories Grid
   Widget _buildCategoryGrid(BuildContext context, FASTProvider provider) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 4,
-          crossAxisSpacing: 10,
-          mainAxisSpacing: 10,
-          childAspectRatio: 0.85,
-        ),
+    return SizedBox(
+      height: 40,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: provider.categories.length,
         itemBuilder: (context, index) {
           final cat = provider.categories[index];
           final isActive = provider.selectedCategory == cat.id;
           return GestureDetector(
             onTap: () => provider.setCategory(cat.id),
-            child: Column(
-              children: [
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    color: isActive ? const Color(0xFFF59E0B).withValues(alpha: 0.1) : const Color(0xFF18181B),
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: isActive ? const Color(0xFFF59E0B) : const Color(0xFF27272A),
-                      width: isActive ? 2 : 1,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              margin: const EdgeInsets.only(right: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(
+                color: isActive ? const Color(0xFFF59E0B) : const Color(0xFF18181B),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: isActive ? const Color(0xFFF59E0B) : const Color(0xFF3F3F46),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(cat.icon, style: const TextStyle(fontSize: 14)),
+                  const SizedBox(width: 6),
+                  Text(
+                    cat.name,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: isActive ? const Color(0xFF09090B) : const Color(0xFFA1A1AA),
                     ),
-                    boxShadow: isActive
-                        ? [
-                            BoxShadow(
-                              color: const Color(0xFFF59E0B).withValues(alpha: 0.15),
-                              blurRadius: 8,
-                              spreadRadius: 1,
-                            )
-                          ]
-                        : null,
                   ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    cat.icon,
-                    style: const TextStyle(fontSize: 22),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  cat.name,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-                    color: isActive ? const Color(0xFFF59E0B) : const Color(0xFFA1A1AA),
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+                ],
+              ),
             ),
           );
         },
@@ -798,61 +777,64 @@ class _HomeScreenState extends State<HomeScreen> {
         provider.navigateToScreen('restaurant');
       },
       child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
+        margin: const EdgeInsets.only(bottom: 20),
         decoration: BoxDecoration(
           color: const Color(0xFF18181B),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(color: const Color(0xFF27272A)),
         ),
         clipBehavior: Clip.antiAlias,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Restaurant Image
+            // Hero image — taller
             Stack(
               children: [
                 Image.network(
                   rest.image,
-                  height: 140,
+                  height: 180,
                   width: double.infinity,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) => Container(
-                    height: 140,
-                    color: Colors.grey,
+                    height: 180,
+                    color: const Color(0xFF27272A),
                   ),
                 ),
-                // Top gradient overlay
+                // Bottom gradient fade into card color
                 Positioned.fill(
-                  child: Container(
+                  child: DecoratedBox(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [Colors.black.withValues(alpha: 0.5), Colors.transparent],
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withValues(alpha: 0.55),
+                        ],
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                       ),
                     ),
                   ),
                 ),
-                // Details badges
+                // Rating badge — top right
                 Positioned(
                   top: 12,
                   right: 12,
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF09090B).withValues(alpha: 0.85),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                      color: Colors.black.withValues(alpha: 0.7),
+                      borderRadius: BorderRadius.circular(20),
                     ),
                     child: Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.star, color: Color(0xFFF59E0B), size: 14),
-                        const SizedBox(width: 4),
+                        const Icon(Icons.star_rounded, color: Color(0xFFF59E0B), size: 13),
+                        const SizedBox(width: 3),
                         Text(
                           '${rest.rating}',
                           style: const TextStyle(
                             fontSize: 11,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w800,
                             color: Colors.white,
                           ),
                         ),
@@ -860,7 +842,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ),
-                // Distance badge
+                // Time + distance — bottom left
                 Positioned(
                   bottom: 12,
                   left: 12,
@@ -868,68 +850,109 @@ class _HomeScreenState extends State<HomeScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: const Color(0xFF09090B),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(20),
                     ),
-                    child: Text(
-                      '⚡ ${rest.pickupPrepTime} min prép • ${provider.getRealDistance(rest).toStringAsFixed(1)} km',
-                      style: const TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFFF59E0B),
-                      ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.access_time_rounded, color: Color(0xFFF59E0B), size: 12),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${rest.pickupPrepTime} min',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Icon(Icons.location_on_rounded, color: Color(0xFF71717A), size: 12),
+                        const SizedBox(width: 2),
+                        Text(
+                          '${provider.getRealDistance(rest).toStringAsFixed(1)} km',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFFA1A1AA),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
               ],
             ),
-            // Text info
+            // Text info row
             Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    rest.name,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 14,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    rest.description,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: Color(0xFFA1A1AA),
-                      height: 1.4,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 10),
-                  // Dietary preference tags
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 6,
-                    children: rest.dietaryOptions.map((tag) {
-                      return Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF09090B),
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: const Color(0xFF27272A)),
-                        ),
-                        child: Text(
-                          tag.label,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          rest.name,
                           style: const TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF71717A),
+                            fontWeight: FontWeight.w800,
+                            fontSize: 15,
+                            color: Colors.white,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      );
-                    }).toList(),
+                        const SizedBox(height: 4),
+                        Text(
+                          rest.description,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF71717A),
+                            height: 1.3,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        if (rest.dietaryOptions.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 5,
+                            children: rest.dietaryOptions.take(3).map((tag) {
+                              return Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF09090B),
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(color: const Color(0xFF3F3F46)),
+                                ),
+                                child: Text(
+                                  tag.label,
+                                  style: const TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF71717A),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  // Quick order CTA arrow
+                  Container(
+                    margin: const EdgeInsets.only(left: 8),
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF59E0B),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.arrow_forward_rounded,
+                      size: 16,
+                      color: Color(0xFF09090B),
+                    ),
                   ),
                 ],
               ),
