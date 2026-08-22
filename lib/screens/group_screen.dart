@@ -277,58 +277,111 @@ class _GroupScreenState extends State<GroupScreen> {
     ]),
   );
 
-  Widget _welcome() => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: const Color(0xFF18181B),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFF27272A)),
-        ),
-        child: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(Icons.groups_2_outlined, color: Color(0xFFF59E0B), size: 36),
-            SizedBox(height: 16),
-            Text('Un retrait commun, chacun paie sa part', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 20)),
-            SizedBox(height: 10),
-            Text('1. Choisissez un restaurant\n2. Partagez le code\n3. Chacun compose et paie sa part\n4. L’hôte envoie les parts payées ensemble', style: TextStyle(color: Color(0xFFA1A1AA), height: 1.7)),
-          ],
-        ),
-      ),
-      const SizedBox(height: 20),
-      SizedBox(
-        height: 50,
-        child: ElevatedButton.icon(
-          onPressed: _create,
-          icon: const Icon(Icons.add_circle_outline),
-          label: const Text('Créer un groupe', style: TextStyle(fontWeight: FontWeight.bold)),
-        ),
-      ),
-      const SizedBox(height: 28),
-      const Text('REJOINDRE AVEC UN CODE', style: TextStyle(color: Color(0xFFA1A1AA), fontWeight: FontWeight.bold, fontSize: 11, letterSpacing: 0.8)),
-      const SizedBox(height: 8),
-      TextField(
-        controller: _codeController,
-        textCapitalization: TextCapitalization.characters,
-        decoration: InputDecoration(
-          hintText: 'FAST-XXXXXXXX',
-          prefixIcon: const Icon(Icons.key_outlined),
-          suffixIcon: IconButton(
-            tooltip: 'Rejoindre',
-            onPressed: _join,
-            icon: const Icon(Icons.arrow_forward),
+  Widget _welcome() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF18181B) : Colors.white;
+    final borderColor = isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0);
+    final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final subColor = isDark ? const Color(0xFFA1A1AA) : const Color(0xFF64748B);
+    final fieldBg = isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: cardBg,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: borderColor),
+            boxShadow: isDark
+                ? null
+                : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
           ),
-          border: const OutlineInputBorder(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(Icons.groups_2_outlined, color: Color(0xFFF59E0B), size: 36),
+              const SizedBox(height: 16),
+              Text(
+                'Un retrait commun, chacun paie sa part',
+                style: TextStyle(color: titleColor, fontWeight: FontWeight.w900, fontSize: 20),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                '1. Choisissez un restaurant\n2. Partagez le code\n3. Chacun compose et paie sa part\n4. L’hôte envoie les parts payées ensemble',
+                style: TextStyle(color: subColor, height: 1.7),
+              ),
+            ],
+          ),
         ),
-        onSubmitted: (_) => _join(),
-      ),
-    ],
-  );
+        const SizedBox(height: 20),
+        SizedBox(
+          height: 50,
+          child: ElevatedButton.icon(
+            onPressed: _create,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFF59E0B),
+              foregroundColor: const Color(0xFF09090B),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              elevation: 0,
+            ),
+            icon: const Icon(Icons.add_circle_outline),
+            label: const Text('Créer un groupe', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ),
+        const SizedBox(height: 28),
+        Text(
+          'REJOINDRE AVEC UN CODE',
+          style: TextStyle(color: subColor, fontWeight: FontWeight.bold, fontSize: 11, letterSpacing: 0.8),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: _codeController,
+          textCapitalization: TextCapitalization.characters,
+          style: TextStyle(color: titleColor, fontWeight: FontWeight.bold),
+          decoration: InputDecoration(
+            hintText: 'FAST-XXXXXXXX',
+            hintStyle: const TextStyle(color: Color(0xFF71717A)),
+            filled: true,
+            fillColor: fieldBg,
+            prefixIcon: const Icon(Icons.key_outlined, color: Color(0xFFF59E0B)),
+            suffixIcon: IconButton(
+              tooltip: 'Rejoindre',
+              onPressed: _join,
+              icon: const Icon(Icons.arrow_forward, color: Color(0xFFF59E0B)),
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: borderColor),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: borderColor),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFFF59E0B)),
+            ),
+          ),
+          onSubmitted: (_) => _join(),
+        ),
+      ],
+    );
+  }
 
   Widget _dashboard() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF18181B) : Colors.white;
+    final borderColor = isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0);
+    final subColor = isDark ? const Color(0xFFA1A1AA) : const Color(0xFF64748B);
+
     final group = _group!;
     final members = (group['members'] as List<dynamic>? ?? const [])
         .whereType<Map<String, dynamic>>()
@@ -349,7 +402,7 @@ class _GroupScreenState extends State<GroupScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('CODE DU GROUPE', style: TextStyle(color: Color(0xFFA1A1AA), fontSize: 10, fontWeight: FontWeight.bold)),
+                  Text('CODE DU GROUPE', style: TextStyle(color: subColor, fontSize: 10, fontWeight: FontWeight.bold)),
                   Text(group['code'] as String? ?? '', style: const TextStyle(color: Color(0xFFF59E0B), fontSize: 24, fontWeight: FontWeight.w900)),
                 ],
               ),
@@ -364,32 +417,50 @@ class _GroupScreenState extends State<GroupScreen> {
           ],
         ),
         const SizedBox(height: 16),
-        _progress(status),
+        _progress(status, isDark),
         const SizedBox(height: 20),
         Container(
           padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(color: const Color(0xFF18181B), borderRadius: BorderRadius.circular(14), border: Border.all(color: const Color(0xFF27272A))),
+          decoration: BoxDecoration(
+            color: cardBg,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: borderColor),
+            boxShadow: isDark
+                ? null
+                : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+          ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _summary('Membres', '${members.length}', Icons.people_outline),
-              _summary('Parts payées', '$paidCount/${members.length}', Icons.verified_outlined),
-              _summary('Total', '${total.toStringAsFixed(2)} €', Icons.receipt_long_outlined),
+              _summary('Membres', '${members.length}', Icons.people_outline, isDark),
+              _summary('Parts payées', '$paidCount/${members.length}', Icons.verified_outlined, isDark),
+              _summary('Total', '${total.toStringAsFixed(2)} €', Icons.receipt_long_outlined, isDark),
             ],
           ),
         ),
         const SizedBox(height: 20),
-        const Text('PARTICIPANTS', style: TextStyle(color: Color(0xFFA1A1AA), fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.8)),
+        Text('PARTICIPANTS', style: TextStyle(color: subColor, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.8)),
         const SizedBox(height: 8),
-        ...members.map(_memberCard),
+        ...members.map((m) => _memberCard(m, isDark)),
         const SizedBox(height: 20),
         if (status == 'OPEN')
           SizedBox(
             height: 50,
             child: ElevatedButton.icon(
               onPressed: _orderMyPart,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFF59E0B),
+                foregroundColor: const Color(0xFF09090B),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
               icon: const Icon(Icons.restaurant_menu),
-              label: const Text('Composer et payer ma part'),
+              label: const Text('Composer et payer ma part', style: TextStyle(fontWeight: FontWeight.bold)),
             ),
           ),
         if (isHost && status == 'OPEN') ...[
@@ -405,12 +476,17 @@ class _GroupScreenState extends State<GroupScreen> {
             height: 50,
             child: ElevatedButton.icon(
               onPressed: paidCount == 0 ? null : () => _action(() => _service.submitGroup(group['id'] as String)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFF59E0B),
+                foregroundColor: const Color(0xFF09090B),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
               icon: const Icon(Icons.send_outlined),
-              label: Text(paidCount == 0 ? 'En attente d’un paiement' : 'Envoyer les $paidCount parts payées'),
+              label: Text(paidCount == 0 ? 'En attente d’un paiement' : 'Envoyer les $paidCount parts payées', style: const TextStyle(fontWeight: FontWeight.bold)),
             ),
           ),
           const SizedBox(height: 8),
-          const Text('Les membres non payés ne seront pas envoyés au restaurant.', textAlign: TextAlign.center, style: TextStyle(color: Color(0xFFA1A1AA), fontSize: 12)),
+          Text('Les membres non payés ne seront pas envoyés au restaurant.', textAlign: TextAlign.center, style: TextStyle(color: subColor, fontSize: 12)),
         ],
         if (status == 'SUBMITTED')
           const _SubmittedCard(),
@@ -418,10 +494,14 @@ class _GroupScreenState extends State<GroupScreen> {
     );
   }
 
-  Widget _progress(String status) {
+  Widget _progress(String status, bool isDark) {
     const steps = ['OPEN', 'LOCKED', 'SUBMITTED'];
     final current = steps.indexOf(status).clamp(0, 2);
     const labels = ['Invitations', 'Paiements', 'Envoyé'];
+    final inactiveBar = isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0);
+    final activeText = isDark ? Colors.white : const Color(0xFF0F172A);
+    final inactiveText = isDark ? const Color(0xFF71717A) : const Color(0xFF94A3B8);
+
     return Row(
       children: List.generate(3, (index) => Expanded(
         child: Column(
@@ -430,26 +510,35 @@ class _GroupScreenState extends State<GroupScreen> {
               height: 4,
               margin: const EdgeInsets.symmetric(horizontal: 3),
               decoration: BoxDecoration(
-                color: index <= current ? const Color(0xFFF59E0B) : const Color(0xFF3F3F46),
+                color: index <= current ? const Color(0xFFF59E0B) : inactiveBar,
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
             const SizedBox(height: 6),
-            Text(labels[index], style: TextStyle(color: index <= current ? Colors.white : const Color(0xFF71717A), fontSize: 10, fontWeight: FontWeight.bold)),
+            Text(labels[index], style: TextStyle(color: index <= current ? activeText : inactiveText, fontSize: 10, fontWeight: FontWeight.bold)),
           ],
         ),
       )),
     );
   }
 
-  Widget _summary(String label, String value, IconData icon) => Column(children: [
-    Icon(icon, color: const Color(0xFFF59E0B), size: 20),
-    const SizedBox(height: 6),
-    Text(value, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900)),
-    Text(label, style: const TextStyle(color: Color(0xFFA1A1AA), fontSize: 10)),
-  ]);
+  Widget _summary(String label, String value, IconData icon, bool isDark) {
+    final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final subColor = isDark ? const Color(0xFFA1A1AA) : const Color(0xFF64748B);
+    return Column(children: [
+      Icon(icon, color: const Color(0xFFF59E0B), size: 20),
+      const SizedBox(height: 6),
+      Text(value, style: TextStyle(color: titleColor, fontWeight: FontWeight.w900)),
+      Text(label, style: TextStyle(color: subColor, fontSize: 10)),
+    ]);
+  }
 
-  Widget _memberCard(Map<String, dynamic> member) {
+  Widget _memberCard(Map<String, dynamic> member, bool isDark) {
+    final cardBg = isDark ? const Color(0xFF18181B) : Colors.white;
+    final borderColor = isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0);
+    final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final subColor = isDark ? const Color(0xFFA1A1AA) : const Color(0xFF64748B);
+
     final user = member['user'] as Map<String, dynamic>?;
     final name = user?['name'] as String? ?? 'Participant';
     final paymentStatus = member['paymentStatus'] as String? ?? 'DRAFT';
@@ -457,24 +546,43 @@ class _GroupScreenState extends State<GroupScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(color: const Color(0xFF18181B), borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFF27272A))),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor),
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.03),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+      ),
       child: Row(
         children: [
           CircleAvatar(
-            backgroundColor: paid ? const Color(0xFF10B981).withValues(alpha: 0.18) : const Color(0xFF3F3F46),
-            child: Text(name.isEmpty ? '?' : name[0].toUpperCase(), style: TextStyle(color: paid ? const Color(0xFF10B981) : Colors.white, fontWeight: FontWeight.bold)),
+            backgroundColor: paid ? const Color(0xFF10B981).withValues(alpha: 0.18) : (isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0)),
+            child: Text(
+              name.isEmpty ? '?' : name[0].toUpperCase(),
+              style: TextStyle(
+                color: paid ? const Color(0xFF10B981) : (isDark ? Colors.white : const Color(0xFF0F172A)),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              Text(name, style: TextStyle(color: titleColor, fontWeight: FontWeight.bold)),
               Text(
                 paid ? 'Part payée' : paymentStatus == 'READY' ? 'Paiement en cours' : 'Compose sa part',
-                style: TextStyle(color: paid ? const Color(0xFF10B981) : const Color(0xFFA1A1AA), fontSize: 11),
+                style: TextStyle(color: paid ? const Color(0xFF10B981) : subColor, fontSize: 11),
               ),
             ]),
           ),
-          Text('${((member['total'] as num?)?.toDouble() ?? 0).toStringAsFixed(2)} €', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          Text('${((member['total'] as num?)?.toDouble() ?? 0).toStringAsFixed(2)} €', style: TextStyle(color: titleColor, fontWeight: FontWeight.bold)),
           const SizedBox(width: 8),
           Icon(paid ? Icons.check_circle : Icons.hourglass_empty, color: paid ? const Color(0xFF10B981) : const Color(0xFFF59E0B)),
         ],

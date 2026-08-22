@@ -110,6 +110,10 @@ class _AccountScreenState extends State<AccountScreen>
 
   // ─── Profile Header ──────────────────────────────────────────────────────────
   Widget _buildProfileHeader(FASTProvider provider) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final subColor = isDark ? const Color(0xFFA1A1AA) : const Color(0xFF64748B);
+
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
       child: Row(
@@ -139,19 +143,19 @@ class _AccountScreenState extends State<AccountScreen>
               children: [
                 Text(
                   provider.userName.isNotEmpty ? provider.userName : 'Votre nom',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w900,
-                    color: Colors.white,
+                    color: titleColor,
                   ),
                 ),
                 if (provider.userEmail.isNotEmpty) ...[
                   const SizedBox(height: 2),
                   Text(
                     provider.userEmail,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
-                      color: Color(0xFFA1A1AA),
+                      color: subColor,
                     ),
                   ),
                 ],
@@ -189,26 +193,42 @@ class _AccountScreenState extends State<AccountScreen>
 
   // ─── Stats Row ───────────────────────────────────────────────────────────────
   Widget _buildStatsRow(FASTProvider provider) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF18181B) : Colors.white;
+    final borderColor = isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0);
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF18181B),
+        color: cardBg,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFF27272A)),
+        border: Border.all(color: borderColor),
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
       ),
       child: Row(
         children: [
-          _statCell('📦', '${provider.orders.length}', 'Commandes'),
-          Container(width: 1, height: 48, color: const Color(0xFF27272A)),
-          _statCell('❤️', '0', 'Favoris'),
-          Container(width: 1, height: 48, color: const Color(0xFF27272A)),
-          _statCell('⚡', '${provider.userPoints}', 'Points'),
+          _statCell('📦', '${provider.orders.length}', 'Commandes', isDark),
+          Container(width: 1, height: 48, color: borderColor),
+          _statCell('❤️', '0', 'Favoris', isDark),
+          Container(width: 1, height: 48, color: borderColor),
+          _statCell('⚡', '${provider.userPoints}', 'Points', isDark),
         ],
       ),
     );
   }
 
-  Widget _statCell(String icon, String value, String label) {
+  Widget _statCell(String icon, String value, String label, bool isDark) {
+    final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final subColor = isDark ? const Color(0xFF71717A) : const Color(0xFF64748B);
+
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 14),
@@ -218,16 +238,16 @@ class _AccountScreenState extends State<AccountScreen>
             const SizedBox(height: 4),
             Text(
               value,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w900,
-                color: Colors.white,
+                color: titleColor,
               ),
             ),
             const SizedBox(height: 2),
             Text(
               label,
-              style: const TextStyle(fontSize: 10, color: Color(0xFF71717A)),
+              style: TextStyle(fontSize: 10, color: subColor),
             ),
           ],
         ),
@@ -237,6 +257,11 @@ class _AccountScreenState extends State<AccountScreen>
 
   // ─── Profil Tab ──────────────────────────────────────────────────────────────
   Widget _buildProfilTab(FASTProvider provider) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF18181B) : Colors.white;
+    final borderColor = isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0);
+    final subColor = isDark ? const Color(0xFF71717A) : const Color(0xFF64748B);
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -245,16 +270,25 @@ class _AccountScreenState extends State<AccountScreen>
           // Personal info section
           _sectionLabel('INFORMATIONS PERSONNELLES'),
           const SizedBox(height: 4),
-          const Text(
+          Text(
             'Commandez en Click & Collect ou en livraison à domicile.',
-            style: TextStyle(fontSize: 11, color: Color(0xFF71717A), height: 1.4),
+            style: TextStyle(fontSize: 11, color: subColor, height: 1.4),
           ),
           const SizedBox(height: 8),
           Container(
             decoration: BoxDecoration(
-              color: const Color(0xFF18181B),
+              color: cardBg,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xFF27272A)),
+              border: Border.all(color: borderColor),
+              boxShadow: isDark
+                  ? null
+                  : [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
             ),
             child: Column(
               children: [
@@ -262,6 +296,7 @@ class _AccountScreenState extends State<AccountScreen>
                   label: 'NOM COMPLET',
                   value: provider.userName,
                   hint: 'Non renseigné',
+                  isDark: isDark,
                   onEdit: () => _showEditDialog(
                     context,
                     'Nom complet',
@@ -269,11 +304,12 @@ class _AccountScreenState extends State<AccountScreen>
                     (val) => provider.updateProfile(name: val),
                   ),
                 ),
-                const Divider(height: 1, color: Color(0xFF27272A)),
+                Divider(height: 1, color: borderColor),
                 _editableField(
                   label: 'TÉLÉPHONE',
                   value: provider.userPhone,
                   hint: 'Non renseigné',
+                  isDark: isDark,
                   onEdit: () => _showEditDialog(
                     context,
                     'Téléphone',
@@ -282,11 +318,12 @@ class _AccountScreenState extends State<AccountScreen>
                     keyboardType: TextInputType.phone,
                   ),
                 ),
-                const Divider(height: 1, color: Color(0xFF27272A)),
+                Divider(height: 1, color: borderColor),
                 _editableField(
                   label: 'EMAIL',
                   value: provider.userEmail,
                   hint: 'Non renseigné',
+                  isDark: isDark,
                   onEdit: () => _showEditDialog(
                     context,
                     'Email',
@@ -307,9 +344,18 @@ class _AccountScreenState extends State<AccountScreen>
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: const Color(0xFF18181B),
+              color: cardBg,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xFF27272A)),
+              border: Border.all(color: borderColor),
+              boxShadow: isDark
+                  ? null
+                  : [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -327,16 +373,16 @@ class _AccountScreenState extends State<AccountScreen>
                     const SizedBox(width: 10),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
+                      children: [
                         Text(
                           "Thème de l'interface",
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: isDark ? Colors.white : const Color(0xFF0F172A),
                           ),
                         ),
-                        Text(
+                        const Text(
                           'Clair, sombre ou selon l\'appareil',
                           style: TextStyle(fontSize: 10, color: Color(0xFFF59E0B)),
                         ),
@@ -347,11 +393,11 @@ class _AccountScreenState extends State<AccountScreen>
                 const SizedBox(height: 14),
                 Row(
                   children: [
-                    _themeOption(provider, ThemeMode.system, Icons.phone_android, 'Auto'),
+                    _themeOption(provider, ThemeMode.system, Icons.phone_android, 'Auto', isDark),
                     const SizedBox(width: 8),
-                    _themeOption(provider, ThemeMode.light, Icons.wb_sunny_outlined, 'Clair'),
+                    _themeOption(provider, ThemeMode.light, Icons.wb_sunny_outlined, 'Clair', isDark),
                     const SizedBox(width: 8),
-                    _themeOption(provider, ThemeMode.dark, Icons.nightlight_outlined, 'Sombre'),
+                    _themeOption(provider, ThemeMode.dark, Icons.nightlight_outlined, 'Sombre', isDark),
                   ],
                 ),
               ],
@@ -365,17 +411,26 @@ class _AccountScreenState extends State<AccountScreen>
           const SizedBox(height: 8),
           Container(
             decoration: BoxDecoration(
-              color: const Color(0xFF18181B),
+              color: cardBg,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xFF27272A)),
+              border: Border.all(color: borderColor),
+              boxShadow: isDark
+                  ? null
+                  : [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
             ),
             child: ListTile(
               onTap: () => context.read<AuthProvider>().logout(),
               leading: const Icon(Icons.logout, color: Color(0xFFF59E0B), size: 20),
-              title: const Text(
+              title: Text(
                 'Se déconnecter',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: isDark ? Colors.white : const Color(0xFF0F172A),
                   fontWeight: FontWeight.bold,
                   fontSize: 13,
                 ),
@@ -390,9 +445,18 @@ class _AccountScreenState extends State<AccountScreen>
           const SizedBox(height: 8),
           Container(
             decoration: BoxDecoration(
-              color: const Color(0xFF18181B),
+              color: cardBg,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xFF27272A)),
+              border: Border.all(color: borderColor),
+              boxShadow: isDark
+                  ? null
+                  : [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
             ),
             child: ListTile(
               onTap: () => _showDeleteConfirm(context, provider),
@@ -446,7 +510,9 @@ class _AccountScreenState extends State<AccountScreen>
     required String value,
     required String hint,
     required VoidCallback onEdit,
+    bool isDark = true,
   }) {
+    final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       child: Row(
@@ -464,7 +530,7 @@ class _AccountScreenState extends State<AccountScreen>
                   value.isNotEmpty ? value : hint,
                   style: TextStyle(
                     fontSize: 14,
-                    color: value.isNotEmpty ? Colors.white : const Color(0xFF52525B),
+                    color: value.isNotEmpty ? textColor : const Color(0xFF52525B),
                   ),
                 ),
               ],
@@ -479,8 +545,12 @@ class _AccountScreenState extends State<AccountScreen>
     );
   }
 
-  Widget _themeOption(FASTProvider provider, ThemeMode mode, IconData icon, String label) {
+  Widget _themeOption(FASTProvider provider, ThemeMode mode, IconData icon, String label, bool isDark) {
     final selected = provider.themeMode == mode;
+    final unselectedBg = isDark ? const Color(0xFF27272A) : const Color(0xFFF1F5F9);
+    final unselectedFg = isDark ? const Color(0xFFA1A1AA) : const Color(0xFF475569);
+    final unselectedBorder = isDark ? Colors.transparent : const Color(0xFFE2E8F0);
+
     return Expanded(
       child: GestureDetector(
         onTap: () => provider.setThemeMode(mode),
@@ -488,19 +558,20 @@ class _AccountScreenState extends State<AccountScreen>
           duration: const Duration(milliseconds: 150),
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: selected ? const Color(0xFF10B981) : const Color(0xFF27272A),
+            color: selected ? const Color(0xFF10B981) : unselectedBg,
             borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: selected ? Colors.transparent : unselectedBorder),
           ),
           child: Column(
             children: [
-              Icon(icon, color: selected ? Colors.white : const Color(0xFFA1A1AA), size: 16),
+              Icon(icon, color: selected ? Colors.white : unselectedFg, size: 16),
               const SizedBox(height: 4),
               Text(
                 label,
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
-                  color: selected ? Colors.white : const Color(0xFFA1A1AA),
+                  color: selected ? Colors.white : unselectedFg,
                 ),
               ),
             ],
@@ -517,37 +588,43 @@ class _AccountScreenState extends State<AccountScreen>
     Function(String) onSave, {
     TextInputType keyboardType = TextInputType.text,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final dialogBg = isDark ? const Color(0xFF18181B) : Colors.white;
+    final fieldBg = isDark ? const Color(0xFF09090B) : const Color(0xFFF1F5F9);
+    final borderColor = isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0);
+    final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
+
     final controller = TextEditingController(text: currentValue);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF18181B),
+        backgroundColor: dialogBg,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: const BorderSide(color: Color(0xFF27272A)),
+          side: BorderSide(color: borderColor),
         ),
         title: Text(
           'Modifier $fieldName',
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+          style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 14),
         ),
         content: TextField(
           controller: controller,
           autofocus: true,
           keyboardType: keyboardType,
-          style: const TextStyle(color: Colors.white, fontSize: 14),
+          style: TextStyle(color: textColor, fontSize: 14),
           decoration: InputDecoration(
             hintText: fieldName,
             hintStyle: const TextStyle(color: Color(0xFF52525B)),
             filled: true,
-            fillColor: const Color(0xFF09090B),
+            fillColor: fieldBg,
             contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFF27272A)),
+              borderSide: BorderSide(color: borderColor),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFF27272A)),
+              borderSide: BorderSide(color: borderColor),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
@@ -587,10 +664,14 @@ class _AccountScreenState extends State<AccountScreen>
   }
 
   void _showDeleteConfirm(BuildContext context, FASTProvider provider) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final dialogBg = isDark ? const Color(0xFF18181B) : Colors.white;
+    final subColor = isDark ? const Color(0xFFA1A1AA) : const Color(0xFF64748B);
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF18181B),
+        backgroundColor: dialogBg,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
           side: const BorderSide(color: Color(0xFFEF4444), width: 1),
@@ -599,9 +680,9 @@ class _AccountScreenState extends State<AccountScreen>
           'Supprimer le compte ?',
           style: TextStyle(color: Color(0xFFEF4444), fontWeight: FontWeight.bold, fontSize: 14),
         ),
-        content: const Text(
+        content: Text(
           'Toutes vos données (commandes, profil, notifications) seront supprimées. Cette action est irréversible.',
-          style: TextStyle(color: Color(0xFFA1A1AA), fontSize: 12, height: 1.4),
+          style: TextStyle(color: subColor, fontSize: 12, height: 1.4),
         ),
         actions: [
           TextButton(
@@ -629,6 +710,12 @@ class _AccountScreenState extends State<AccountScreen>
 
   // ─── Points Tab ──────────────────────────────────────────────────────────────
   Widget _buildPointsTab(FASTProvider provider) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF18181B) : Colors.white;
+    final borderColor = isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0);
+    final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final subColor = isDark ? const Color(0xFF71717A) : const Color(0xFF64748B);
+
     final completedOrders = provider.orders
         .where((o) => o.status == OrderStatus.completed)
         .toList();
@@ -642,9 +729,18 @@ class _AccountScreenState extends State<AccountScreen>
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: const Color(0xFF18181B),
+              color: cardBg,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xFF27272A)),
+              border: Border.all(color: borderColor),
+              boxShadow: isDark
+                  ? null
+                  : [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
             ),
             child: Row(
               children: [
@@ -662,10 +758,10 @@ class _AccountScreenState extends State<AccountScreen>
                   children: [
                     Text(
                       '${provider.userPoints} points',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.w900,
-                        color: Colors.white,
+                        color: titleColor,
                       ),
                     ),
                     Text(
@@ -685,7 +781,7 @@ class _AccountScreenState extends State<AccountScreen>
           const SizedBox(height: 20),
 
           // Progress to next level
-          _buildLevelProgress(provider.userPoints),
+          _buildLevelProgress(provider.userPoints, isDark),
 
           const SizedBox(height: 20),
 
@@ -696,14 +792,14 @@ class _AccountScreenState extends State<AccountScreen>
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: const Color(0xFF18181B),
+                color: cardBg,
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: const Color(0xFF27272A)),
+                border: Border.all(color: borderColor),
               ),
-              child: const Center(
+              child: Center(
                 child: Text(
                   'Aucun point encore.\nComplétez votre première commande pour gagner des points !',
-                  style: TextStyle(fontSize: 12, color: Color(0xFF71717A), height: 1.5),
+                  style: TextStyle(fontSize: 12, color: subColor, height: 1.5),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -711,9 +807,9 @@ class _AccountScreenState extends State<AccountScreen>
           else
             Container(
               decoration: BoxDecoration(
-                color: const Color(0xFF18181B),
+                color: cardBg,
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: const Color(0xFF27272A)),
+                border: Border.all(color: borderColor),
               ),
               child: Column(
                 children: completedOrders.asMap().entries.map((entry) {
@@ -722,7 +818,7 @@ class _AccountScreenState extends State<AccountScreen>
                   return Column(
                     children: [
                       if (idx > 0)
-                        const Divider(height: 1, color: Color(0xFF27272A)),
+                        Divider(height: 1, color: borderColor),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                         child: Row(
@@ -742,15 +838,15 @@ class _AccountScreenState extends State<AccountScreen>
                                 children: [
                                   Text(
                                     order.restaurantName,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.white,
+                                      color: titleColor,
                                     ),
                                   ),
                                   Text(
                                     'Commande récupérée · ${order.id}',
-                                    style: const TextStyle(fontSize: 10, color: Color(0xFF71717A)),
+                                    style: TextStyle(fontSize: 10, color: subColor),
                                   ),
                                 ],
                               ),
@@ -778,7 +874,13 @@ class _AccountScreenState extends State<AccountScreen>
     );
   }
 
-  Widget _buildLevelProgress(int pts) {
+  Widget _buildLevelProgress(int pts, bool isDark) {
+    final cardBg = isDark ? const Color(0xFF18181B) : Colors.white;
+    final borderColor = isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0);
+    final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final subColor = isDark ? const Color(0xFF71717A) : const Color(0xFF64748B);
+    final barBg = isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0);
+
     int nextThreshold;
     String nextLevel;
     int prevThreshold;
@@ -818,9 +920,18 @@ class _AccountScreenState extends State<AccountScreen>
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF18181B),
+        color: cardBg,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFF27272A)),
+        border: Border.all(color: borderColor),
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -830,11 +941,11 @@ class _AccountScreenState extends State<AccountScreen>
             children: [
               Text(
                 'Vers $nextLevel',
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: titleColor),
               ),
               Text(
                 '$remaining pts restants',
-                style: const TextStyle(fontSize: 11, color: Color(0xFF71717A)),
+                style: TextStyle(fontSize: 11, color: subColor),
               ),
             ],
           ),
@@ -843,7 +954,7 @@ class _AccountScreenState extends State<AccountScreen>
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
               value: progress,
-              backgroundColor: const Color(0xFF27272A),
+              backgroundColor: barBg,
               valueColor: const AlwaysStoppedAnimation(Color(0xFFF59E0B)),
               minHeight: 6,
             ),
@@ -855,6 +966,12 @@ class _AccountScreenState extends State<AccountScreen>
 
   // ─── Adresses Tab ────────────────────────────────────────────────────────────
   Widget _buildAdressesTab() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF18181B) : Colors.white;
+    final borderColor = isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0);
+    final titleColor = isDark ? const Color(0xFFA1A1AA) : const Color(0xFF475569);
+    final subColor = isDark ? const Color(0xFF71717A) : const Color(0xFF64748B);
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -863,27 +980,36 @@ class _AccountScreenState extends State<AccountScreen>
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: const Color(0xFF18181B),
+              color: cardBg,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xFF27272A)),
+              border: Border.all(color: borderColor),
+              boxShadow: isDark
+                  ? null
+                  : [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
             ),
-            child: const Center(
+            child: Center(
               child: Column(
                 children: [
-                  Icon(Icons.location_on_outlined, size: 40, color: Color(0xFF3F3F46)),
-                  SizedBox(height: 12),
+                  const Icon(Icons.location_on_outlined, size: 40, color: Color(0xFFF59E0B)),
+                  const SizedBox(height: 12),
                   Text(
                     'Aucune adresse enregistrée',
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFFA1A1AA),
+                      color: titleColor,
                     ),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
                     'Vos adresses de livraison favorites seront enregistrées ici.',
-                    style: TextStyle(fontSize: 11, color: Color(0xFF71717A), height: 1.5),
+                    style: TextStyle(fontSize: 11, color: subColor, height: 1.5),
                     textAlign: TextAlign.center,
                   ),
                 ],

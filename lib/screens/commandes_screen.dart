@@ -156,6 +156,10 @@ class _CommandesScreenState extends State<CommandesScreen> with TickerProviderSt
 
   // ─── SUIVI TAB ─────────────────────────────────────────────────────────────
   Widget _buildSuiviTab(FASTProvider provider) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final subColor = isDark ? const Color(0xFFA1A1AA) : const Color(0xFF64748B);
+
     final activeOrders = provider.orders
         .where((o) => o.status != OrderStatus.completed && o.status != OrderStatus.cancelled)
         .toList();
@@ -170,14 +174,14 @@ class _CommandesScreenState extends State<CommandesScreen> with TickerProviderSt
             children: [
               const Text('🚶', style: TextStyle(fontSize: 48)),
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 'Aucun suivi actif',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: titleColor),
               ),
               const SizedBox(height: 6),
-              const Text(
+              Text(
                 'Passez une commande depuis le panier pour activer le suivi de marche !',
-                style: TextStyle(fontSize: 11, color: Color(0xFFA1A1AA)),
+                style: TextStyle(fontSize: 11, color: subColor),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
@@ -245,12 +249,13 @@ class _CommandesScreenState extends State<CommandesScreen> with TickerProviderSt
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
-                            color: selected ? const Color(0xFF09090B) : Colors.white,
+                            color: selected ? const Color(0xFF09090B) : (isDark ? Colors.white : const Color(0xFF0F172A)),
                           ),
                         ),
                         selected: selected,
                         selectedColor: const Color(0xFFF59E0B),
-                        backgroundColor: const Color(0xFF18181B),
+                        backgroundColor: isDark ? const Color(0xFF18181B) : Colors.white,
+                        side: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
                         onSelected: (_) => setState(() => _selectedActiveIndex = index),
                       );
                     },
@@ -262,30 +267,30 @@ class _CommandesScreenState extends State<CommandesScreen> with TickerProviderSt
               const SizedBox(height: 16),
               if (!isCancelled) ...[
                 if (activeOrder.isDelivery) ...[
-                  const Text(
-                    'SUIVI LIVRAISON',
+                  Text(
+                    'SUIVI LIVRAISON EN DIRECT',
                     style: TextStyle(
-                      fontSize: 9,
+                      fontFamily: 'monospace',
                       fontWeight: FontWeight.bold,
-                      letterSpacing: 1.0,
-                      color: Color(0xFF71717A),
+                      fontSize: 10,
+                      color: subColor,
                     ),
                   ),
                   const SizedBox(height: 8),
                   _buildDeliveryTrackingCard(activeOrder),
-                ] else ...[
-                  const Text(
-                    'SUIVI GPS — TRAJET VERS LE RESTAURANT',
-                    style: TextStyle(
-                      fontSize: 9,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.0,
-                      color: Color(0xFF71717A),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  _buildVectorMapCard(context, walkProgress, activeOrder),
+                  const SizedBox(height: 16),
                 ],
+                Text(
+                  'ITINÉRAIRE EN DIRECT',
+                  style: TextStyle(
+                    fontFamily: 'monospace',
+                    fontWeight: FontWeight.bold,
+                    fontSize: 10,
+                    color: subColor,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                _buildVectorMapCard(context, walkProgress, activeOrder),
                 const SizedBox(height: 16),
               ],
 
@@ -297,6 +302,8 @@ class _CommandesScreenState extends State<CommandesScreen> with TickerProviderSt
               if (!activeOrder.isDelivery &&
                   (activeOrder.status == OrderStatus.readyForPickup || isCompleted))
                 _buildQRButton(context, activeOrder),
+
+              const SizedBox(height: 16),
 
               // Cancellation trigger
               if (!isCompleted && !isCancelled)
@@ -315,26 +322,43 @@ class _CommandesScreenState extends State<CommandesScreen> with TickerProviderSt
   }
 
   Widget _buildTrackerHeader(BuildContext context, Order order, bool isCompleted, bool isCancelled) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF18181B) : Colors.white;
+    final borderColor = isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0);
+    final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final subColor = isDark ? const Color(0xFFA1A1AA) : const Color(0xFF64748B);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF18181B),
+        color: cardBg,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF27272A)),
+        border: Border.all(color: borderColor),
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: Image.network(
-              order.restaurantImage,
-              width: 56,
-              height: 56,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) =>
-                  Container(color: Colors.grey, width: 56, height: 56),
-            ),
+            child: order.restaurantImage.isNotEmpty
+                ? Image.network(
+                    order.restaurantImage,
+                    width: 56,
+                    height: 56,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        Container(color: const Color(0xFFF59E0B), width: 56, height: 56, alignment: Alignment.center, child: const Icon(Icons.restaurant, color: Color(0xFF09090B))),
+                  )
+                : Container(color: const Color(0xFFF59E0B), width: 56, height: 56, alignment: Alignment.center, child: const Icon(Icons.restaurant, color: Color(0xFF09090B))),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -359,12 +383,12 @@ class _CommandesScreenState extends State<CommandesScreen> with TickerProviderSt
                 const SizedBox(height: 4),
                 Text(
                   order.restaurantName,
-                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15, color: Colors.white),
+                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15, color: titleColor),
                 ),
                 const SizedBox(height: 6),
                 Row(
                   children: [
-                    const Icon(Icons.directions_walk, size: 12, color: Color(0xFFA1A1AA)),
+                    Icon(Icons.directions_walk, size: 12, color: subColor),
                     const SizedBox(width: 4),
                     Text(
                       isCompleted
@@ -372,7 +396,7 @@ class _CommandesScreenState extends State<CommandesScreen> with TickerProviderSt
                           : isCancelled
                               ? 'Annulé'
                               : 'Arrivée estimée dans : ${order.userWalkTimeMinutes} min',
-                      style: const TextStyle(fontSize: 11, color: Color(0xFFA1A1AA), fontWeight: FontWeight.bold),
+                      style: TextStyle(fontSize: 11, color: subColor, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -711,12 +735,27 @@ class _CommandesScreenState extends State<CommandesScreen> with TickerProviderSt
       }
     }
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF18181B) : Colors.white;
+    final borderColor = isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0);
+    final titleTextColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final subTextColor = isDark ? const Color(0xFFA1A1AA) : const Color(0xFF64748B);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF18181B),
+        color: cardBg,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF27272A)),
+        border: Border.all(color: borderColor),
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -736,12 +775,12 @@ class _CommandesScreenState extends State<CommandesScreen> with TickerProviderSt
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: titleTextColor),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   desc,
-                  style: const TextStyle(fontSize: 11, color: Color(0xFFA1A1AA), height: 1.4),
+                  style: TextStyle(fontSize: 11, color: subTextColor, height: 1.4),
                 ),
               ],
             ),
@@ -1167,6 +1206,10 @@ class _CommandesScreenState extends State<CommandesScreen> with TickerProviderSt
 
   // ─── HISTORIQUE TAB ────────────────────────────────────────────────────────
   Widget _buildHistoriqueTab(FASTProvider provider) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final subColor = isDark ? const Color(0xFFA1A1AA) : const Color(0xFF64748B);
+
     final orders = provider.orders;
 
     if (orders.isEmpty) {
@@ -1178,14 +1221,14 @@ class _CommandesScreenState extends State<CommandesScreen> with TickerProviderSt
             children: [
               const Text('📜', style: TextStyle(fontSize: 48)),
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 'Aucun historique de commande',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: titleColor),
               ),
               const SizedBox(height: 6),
-              const Text(
+              Text(
                 'Une fois que vous aurez récupéré des commandes Click & Collect, l\'historique apparaîtra ici.',
-                style: TextStyle(fontSize: 11, color: Color(0xFFA1A1AA)),
+                style: TextStyle(fontSize: 11, color: subColor),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -1205,15 +1248,32 @@ class _CommandesScreenState extends State<CommandesScreen> with TickerProviderSt
   }
 
   Widget _buildOrderHistoryCard(BuildContext context, FASTProvider provider, Order order) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF18181B) : Colors.white;
+    final headerBg = isDark ? const Color(0xFF09090B) : const Color(0xFFF8F9FA);
+    final borderColor = isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0);
+    final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final itemTextColor = isDark ? const Color(0xFFE4E4E7) : const Color(0xFF334155);
+    final subColor = isDark ? const Color(0xFF71717A) : const Color(0xFF64748B);
+
     final formattedDate = _parseIsoDate(order.createdAt);
     final isCompleted = order.status == OrderStatus.completed;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF18181B),
+        color: cardBg,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF27272A)),
+        border: Border.all(color: borderColor),
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -1222,20 +1282,22 @@ class _CommandesScreenState extends State<CommandesScreen> with TickerProviderSt
           // Header
           Container(
             padding: const EdgeInsets.all(16),
-            color: const Color(0xFF09090B),
+            color: headerBg,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
-                  child: Image.network(
-                    order.restaurantImage,
-                    width: 44,
-                    height: 44,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        Container(color: Colors.grey, width: 44, height: 44),
-                  ),
+                  child: order.restaurantImage.isNotEmpty
+                      ? Image.network(
+                          order.restaurantImage,
+                          width: 44,
+                          height: 44,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              Container(color: const Color(0xFFF59E0B), width: 44, height: 44, alignment: Alignment.center, child: const Icon(Icons.restaurant, color: Color(0xFF09090B), size: 20)),
+                        )
+                      : Container(color: const Color(0xFFF59E0B), width: 44, height: 44, alignment: Alignment.center, child: const Icon(Icons.restaurant, color: Color(0xFF09090B), size: 20)),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -1247,11 +1309,11 @@ class _CommandesScreenState extends State<CommandesScreen> with TickerProviderSt
                         children: [
                           Text(
                             order.id,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontFamily: 'monospace',
                               fontWeight: FontWeight.bold,
                               fontSize: 9,
-                              color: Color(0xFFA1A1AA),
+                              color: subColor,
                             ),
                           ),
                           _buildStatusLabel(order.status),
@@ -1260,12 +1322,12 @@ class _CommandesScreenState extends State<CommandesScreen> with TickerProviderSt
                       const SizedBox(height: 2),
                       Text(
                         order.restaurantName,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white),
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: titleColor),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         'Commandé le : $formattedDate',
-                        style: const TextStyle(fontSize: 10, color: Color(0xFF71717A)),
+                        style: TextStyle(fontSize: 10, color: subColor),
                       ),
                     ],
                   ),
@@ -1288,25 +1350,25 @@ class _CommandesScreenState extends State<CommandesScreen> with TickerProviderSt
                       children: [
                         Text(
                           '${cartItem.quantity}x  ${cartItem.menuItem.name}',
-                          style: const TextStyle(fontSize: 12, color: Color(0xFFE4E4E7)),
+                          style: TextStyle(fontSize: 12, color: itemTextColor),
                         ),
                         Text(
                           '€${(cartItem.menuItem.price * cartItem.quantity).toStringAsFixed(2)}',
-                          style: const TextStyle(fontSize: 11, color: Color(0xFFA1A1AA), fontFamily: 'monospace'),
+                          style: TextStyle(fontSize: 11, color: subColor, fontFamily: 'monospace'),
                         ),
                       ],
                     ),
                   );
                 }),
                 
-                const Divider(color: Color(0xFF27272A), height: 20),
+                Divider(color: borderColor, height: 20),
                 
                 // commission flat fee
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Frais de service FAST', style: TextStyle(fontSize: 11, color: Color(0xFF71717A))),
-                    Text('€${order.serviceFee.toStringAsFixed(2)}', style: const TextStyle(fontSize: 11, color: Color(0xFF71717A), fontFamily: 'monospace')),
+                    Text('Frais de service FAST', style: TextStyle(fontSize: 11, color: subColor)),
+                    Text('€${order.serviceFee.toStringAsFixed(2)}', style: TextStyle(fontSize: 11, color: subColor, fontFamily: 'monospace')),
                   ],
                 ),
                 const SizedBox(height: 6),
@@ -1314,9 +1376,9 @@ class _CommandesScreenState extends State<CommandesScreen> with TickerProviderSt
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       'Total payé',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: titleColor),
                     ),
                     Text(
                       '€${order.total.toStringAsFixed(2)}',

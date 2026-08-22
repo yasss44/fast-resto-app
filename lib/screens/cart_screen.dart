@@ -296,12 +296,26 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Widget _buildWalkTimeSelector(BuildContext context, int minPrepTime) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF18181B) : Colors.white;
+    final borderColor = isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0);
+    final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF18181B),
+        color: cardBg,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF27272A)),
+        border: Border.all(color: borderColor),
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -313,9 +327,9 @@ class _CartScreenState extends State<CartScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Temps de trajet à pied',
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: titleColor),
                     ),
                     const SizedBox(height: 2),
                     Text(
@@ -350,13 +364,13 @@ class _CartScreenState extends State<CartScreen> {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                _buildWalkChip('DÈS QUE POSS. (${minPrepTime}m)', minPrepTime),
+                _buildWalkChip('DÈS QUE POSS. (${minPrepTime}m)', minPrepTime, isDark),
                 const SizedBox(width: 8),
-                _buildWalkChip('+10 min', minPrepTime + 10),
+                _buildWalkChip('+10 min', minPrepTime + 10, isDark),
                 const SizedBox(width: 8),
-                _buildWalkChip('+20 min', minPrepTime + 20),
+                _buildWalkChip('+20 min', minPrepTime + 20, isDark),
                 const SizedBox(width: 8),
-                _buildWalkChip('+30 min', minPrepTime + 30),
+                _buildWalkChip('+30 min', minPrepTime + 30, isDark),
               ],
             ),
           ),
@@ -366,12 +380,18 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Widget _buildFulfillmentSelector(FASTProvider provider) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chipBg = isDark ? const Color(0xFF18181B) : Colors.white;
+    final borderColor = isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0);
+    final unselectedText = isDark ? Colors.white : const Color(0xFF0F172A);
+    final subColor = isDark ? const Color(0xFF71717A) : const Color(0xFF64748B);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'MODE DE RÉCUPÉRATION',
-          style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.0, color: Color(0xFF71717A)),
+          style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.0, color: subColor),
         ),
         const SizedBox(height: 10),
         Row(
@@ -381,9 +401,10 @@ class _CartScreenState extends State<CartScreen> {
                 label: const Text('Click & Collect', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
                 selected: provider.fulfillmentType == FulfillmentType.pickup,
                 selectedColor: const Color(0xFFF59E0B),
-                backgroundColor: const Color(0xFF18181B),
+                backgroundColor: chipBg,
+                side: BorderSide(color: provider.fulfillmentType == FulfillmentType.pickup ? const Color(0xFFF59E0B) : borderColor),
                 labelStyle: TextStyle(
-                  color: provider.fulfillmentType == FulfillmentType.pickup ? const Color(0xFF09090B) : Colors.white,
+                  color: provider.fulfillmentType == FulfillmentType.pickup ? const Color(0xFF09090B) : unselectedText,
                 ),
                 onSelected: (_) => provider.setFulfillmentType(FulfillmentType.pickup),
               ),
@@ -394,9 +415,10 @@ class _CartScreenState extends State<CartScreen> {
                 label: const Text('Livraison', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
                 selected: provider.fulfillmentType == FulfillmentType.delivery,
                 selectedColor: const Color(0xFF10B981),
-                backgroundColor: const Color(0xFF18181B),
+                backgroundColor: chipBg,
+                side: BorderSide(color: provider.fulfillmentType == FulfillmentType.delivery ? const Color(0xFF10B981) : borderColor),
                 labelStyle: TextStyle(
-                  color: provider.fulfillmentType == FulfillmentType.delivery ? const Color(0xFF09090B) : Colors.white,
+                  color: provider.fulfillmentType == FulfillmentType.delivery ? const Color(0xFF09090B) : unselectedText,
                 ),
                 onSelected: (_) => provider.setFulfillmentType(FulfillmentType.delivery),
               ),
@@ -408,25 +430,31 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Widget _buildDeliveryAddressSection(FASTProvider provider) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final fieldBg = isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9);
+    final borderColor = isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0);
+    final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final subColor = isDark ? const Color(0xFF71717A) : const Color(0xFF64748B);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'ADRESSE DE LIVRAISON',
-          style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.0, color: Color(0xFF71717A)),
+          style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.0, color: subColor),
         ),
         const SizedBox(height: 10),
         TextField(
           controller: _deliveryAddressCtrl,
-          style: const TextStyle(color: Colors.white, fontSize: 13),
+          style: TextStyle(color: textColor, fontSize: 13),
           maxLines: 2,
           decoration: InputDecoration(
             hintText: '12 rue Example, 75001 Paris',
             hintStyle: const TextStyle(color: Color(0xFF71717A)),
             filled: true,
-            fillColor: const Color(0xFF18181B),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF27272A))),
-            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF27272A))),
+            fillColor: fieldBg,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: borderColor)),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: borderColor)),
           ),
           onChanged: (v) => provider.setDeliveryAddress(v),
         ),
@@ -474,16 +502,20 @@ class _CartScreenState extends State<CartScreen> {
     }
   }
 
-  Widget _buildWalkChip(String label, int minutes) {
+  Widget _buildWalkChip(String label, int minutes, bool isDark) {
     final isSelected = _selectedWalkTime == minutes;
+    final unselectedBg = isDark ? const Color(0xFF09090B) : const Color(0xFFF1F5F9);
+    final unselectedText = isDark ? Colors.white : const Color(0xFF0F172A);
+    final borderColor = isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0);
+
     return ChoiceChip(
       label: Text(label, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
       selected: isSelected,
-      backgroundColor: const Color(0xFF09090B),
+      backgroundColor: unselectedBg,
       selectedColor: const Color(0xFFF59E0B),
       checkmarkColor: const Color(0xFF09090B),
-      labelStyle: TextStyle(color: isSelected ? const Color(0xFF09090B) : Colors.white),
-      side: BorderSide(color: isSelected ? const Color(0xFFF59E0B) : const Color(0xFF27272A)),
+      labelStyle: TextStyle(color: isSelected ? const Color(0xFF09090B) : unselectedText),
+      side: BorderSide(color: isSelected ? const Color(0xFFF59E0B) : borderColor),
       onSelected: (selected) {
         if (selected) {
           setState(() {
@@ -496,12 +528,28 @@ class _CartScreenState extends State<CartScreen> {
 
   // Secure checkout fields card
   Widget _buildCheckoutFormCard(BuildContext context, FASTProvider provider) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF18181B) : Colors.white;
+    final innerBg = isDark ? const Color(0xFF09090B) : const Color(0xFFF8F9FA);
+    final borderColor = isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0);
+    final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final subColor = isDark ? const Color(0xFFA1A1AA) : const Color(0xFF64748B);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF18181B),
+        color: cardBg,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF27272A)),
+        border: Border.all(color: borderColor),
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
       ),
       child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -521,16 +569,17 @@ class _CartScreenState extends State<CartScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: const Color(0xFF09090B),
+                color: innerBg,
                 borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: borderColor),
               ),
               child: Column(
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Sous-total du panier', style: TextStyle(fontSize: 12, color: Color(0xFFA1A1AA))),
-                      Text('${provider.cartSubtotal.toStringAsFixed(2)} €', style: const TextStyle(fontSize: 12, color: Colors.white, fontFamily: 'monospace')),
+                      Text('Sous-total du panier', style: TextStyle(fontSize: 12, color: subColor)),
+                      Text('${provider.cartSubtotal.toStringAsFixed(2)} €', style: TextStyle(fontSize: 12, color: titleColor, fontFamily: 'monospace')),
                     ],
                   ),
                   const SizedBox(height: 6),
@@ -541,12 +590,12 @@ class _CartScreenState extends State<CartScreen> {
                         provider.fulfillmentType == FulfillmentType.delivery
                             ? 'Frais de livraison'
                             : 'Frais de retrait',
-                        style: const TextStyle(fontSize: 12, color: Color(0xFFA1A1AA)),
+                        style: TextStyle(fontSize: 12, color: subColor),
                       ),
                       if (provider.fulfillmentType == FulfillmentType.delivery)
                         Text(
                           '${provider.cartDeliveryFee.toStringAsFixed(2)} €',
-                          style: const TextStyle(fontSize: 12, color: Colors.white, fontFamily: 'monospace'),
+                          style: TextStyle(fontSize: 12, color: titleColor, fontFamily: 'monospace'),
                         )
                       else
                         Container(
@@ -563,15 +612,15 @@ class _CartScreenState extends State<CartScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Frais de service fixes', style: TextStyle(fontSize: 12, color: Color(0xFFA1A1AA))),
-                      Text('${provider.flatServiceFee.toStringAsFixed(2)} €', style: const TextStyle(fontSize: 12, color: Colors.white, fontFamily: 'monospace')),
+                      Text('Frais de service fixes', style: TextStyle(fontSize: 12, color: subColor)),
+                      Text('${provider.flatServiceFee.toStringAsFixed(2)} €', style: TextStyle(fontSize: 12, color: titleColor, fontFamily: 'monospace')),
                     ],
                   ),
-                  const Divider(color: Color(0xFF27272A), height: 16),
+                  Divider(color: borderColor, height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Montant total', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white)),
+                      Text('Montant total', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: titleColor)),
                       Text('${provider.cartTotal.toStringAsFixed(2)} €', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFFF59E0B), fontFamily: 'monospace')),
                     ],
                   ),
@@ -591,9 +640,9 @@ class _CartScreenState extends State<CartScreen> {
               ),
             ),
             const SizedBox(height: 12),
-            const Text(
+            Text(
               'Les informations bancaires sont saisies directement chez Stripe. FAST ne stocke jamais les numéros de carte.',
-              style: TextStyle(fontSize: 11, color: Color(0xFFA1A1AA), height: 1.35),
+              style: TextStyle(fontSize: 11, color: subColor, height: 1.35),
             ),
             const SizedBox(height: 20),
 
@@ -654,13 +703,18 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Widget _buildProcessingCard() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF18181B) : Colors.white;
+    final borderColor = isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0);
+    final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        color: const Color(0xFF18181B),
+        color: cardBg,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF27272A)),
+        border: Border.all(color: borderColor),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -676,7 +730,7 @@ class _CartScreenState extends State<CartScreen> {
           const SizedBox(height: 20),
           Text(
             _processStep,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.white, fontFamily: 'monospace'),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: titleColor, fontFamily: 'monospace'),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 6),

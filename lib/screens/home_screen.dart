@@ -138,21 +138,28 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     }
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final panelBg = isDark ? const Color(0xFF09090B) : const Color(0xFFF8F9FA);
+    final chipBg = isDark ? const Color(0xFF18181B) : Colors.white;
+    final chipBorder = isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0);
+    final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final subColor = isDark ? const Color(0xFFA1A1AA) : const Color(0xFF64748B);
+
     return Container(
-      color: const Color(0xFF09090B),
+      color: panelBg,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Section 1: Categories Autocomplete Suggestions
           if (suggCategories.isNotEmpty) ...[
-            const Text(
+            Text(
               'CATÉGORIES CORRESPONDANTES',
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.0,
-                color: Color(0xFF71717A),
+                color: subColor,
               ),
             ),
             const SizedBox(height: 8),
@@ -166,13 +173,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   return Padding(
                     padding: const EdgeInsets.only(right: 8),
                     child: ActionChip(
-                      backgroundColor: const Color(0xFF18181B),
-                      side: const BorderSide(color: Color(0xFF27272A)),
+                      backgroundColor: chipBg,
+                      side: BorderSide(color: chipBorder),
                       avatar: Text(cat.icon),
                       label: Text(
                         cat.name,
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: titleColor,
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                         ),
@@ -191,13 +198,13 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
 
           // Section 2: Matching Kitchens & Dishes List
-          const Text(
+          Text(
             'CUISINES & PLATS CORRESPONDANTS',
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.bold,
               letterSpacing: 1.0,
-              color: Color(0xFF71717A),
+              color: subColor,
             ),
           ),
           const SizedBox(height: 8),
@@ -212,20 +219,20 @@ class _HomeScreenState extends State<HomeScreen> {
                           style: TextStyle(fontSize: 32),
                         ),
                         const SizedBox(height: 12),
-                        const Text(
+                        Text(
                           'Aucun article trouvé',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 13,
-                            color: Color(0xFFA1A1AA),
+                            color: subColor,
                           ),
                         ),
                         const SizedBox(height: 4),
-                        const Text(
+                        Text(
                           'Essayez de rechercher burger, pizza, wrap, salade, etc.',
                           style: TextStyle(
                             fontSize: 10,
-                            color: Color(0xFF71717A),
+                            color: subColor,
                           ),
                         ),
                       ],
@@ -238,22 +245,36 @@ class _HomeScreenState extends State<HomeScreen> {
                         ...matchingRestaurants.map((r) => ListTile(
                               leading: ClipRRect(
                                 borderRadius: BorderRadius.circular(8),
-                                child: Image.network(
-                                  r.image,
-                                  width: 40,
-                                  height: 40,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      Container(color: Colors.grey, width: 40, height: 40),
-                                ),
+                                child: r.image.isNotEmpty
+                                    ? Image.network(
+                                        r.image,
+                                        width: 40,
+                                        height: 40,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) =>
+                                            Container(
+                                          color: const Color(0xFFF59E0B),
+                                          width: 40,
+                                          height: 40,
+                                          alignment: Alignment.center,
+                                          child: Text(_categoryEmoji(r.category, r.name), style: const TextStyle(fontSize: 18)),
+                                        ),
+                                      )
+                                    : Container(
+                                        color: const Color(0xFFF59E0B),
+                                        width: 40,
+                                        height: 40,
+                                        alignment: Alignment.center,
+                                        child: Text(_categoryEmoji(r.category, r.name), style: const TextStyle(fontSize: 18)),
+                                      ),
                               ),
                               title: Text(
                                 r.name,
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: titleColor),
                               ),
                               subtitle: Text(
                                 '${r.pickupPrepTime} min prép • ${provider.getRealDistance(r).toStringAsFixed(1)} km',
-                                style: const TextStyle(fontSize: 11, color: Color(0xFFA1A1AA)),
+                                style: TextStyle(fontSize: 11, color: subColor),
                               ),
                               trailing: const Icon(Icons.chevron_right, size: 16, color: Color(0xFF71717A)),
                               onTap: () {
@@ -270,48 +291,62 @@ class _HomeScreenState extends State<HomeScreen> {
                           return ListTile(
                             leading: ClipRRect(
                               borderRadius: BorderRadius.circular(8),
-                              child: Image.network(
-                                item.image,
-                                width: 40,
-                                height: 40,
-                                fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      Container(color: Colors.grey, width: 40, height: 40),
+                              child: item.image.isNotEmpty
+                                  ? Image.network(
+                                      item.image,
+                                      width: 40,
+                                      height: 40,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) =>
+                                          Container(
+                                        color: const Color(0xFFF59E0B),
+                                        width: 40,
+                                        height: 40,
+                                        alignment: Alignment.center,
+                                        child: const Icon(Icons.restaurant, size: 20, color: Color(0xFF09090B)),
+                                      ),
+                                    )
+                                  : Container(
+                                      color: const Color(0xFFF59E0B),
+                                      width: 40,
+                                      height: 40,
+                                      alignment: Alignment.center,
+                                      child: const Icon(Icons.restaurant, size: 20, color: Color(0xFF09090B)),
+                                    ),
+                            ),
+                            title: Text(
+                              item.name,
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: titleColor),
+                            ),
+                            subtitle: Text(
+                              'De : ${r.name} • ${item.price.toStringAsFixed(2)} €',
+                              style: TextStyle(fontSize: 11, color: subColor),
+                            ),
+                            trailing: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF59E0B).withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Text(
+                                'Commander',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFFF59E0B),
                                 ),
                               ),
-                              title: Text(
-                                item.name,
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                              ),
-                              subtitle: Text(
-                                'De : ${r.name} • ${item.price.toStringAsFixed(2)} €',
-                                style: const TextStyle(fontSize: 11, color: Color(0xFFA1A1AA)),
-                              ),
-                              trailing: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFF59E0B).withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: const Text(
-                                  'Commander',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFFF59E0B),
-                                  ),
-                                ),
-                              ),
-                              onTap: () {
-                                provider.selectRestaurant(r.id);
-                                provider.navigateToScreen('restaurant');
-                              },
-                            );
-                          }),
-                        ],
+                            ),
+                            onTap: () {
+                              provider.selectRestaurant(r.id);
+                              provider.navigateToScreen('restaurant');
+                            },
+                          );
+                        }),
                       ],
-                    ),
-            ),
+                    ],
+                  ),
+          ),
         ],
       ),
     );
@@ -320,6 +355,10 @@ class _HomeScreenState extends State<HomeScreen> {
   // Normal landing page contents
   Widget _buildMainContent(
       BuildContext context, FASTProvider provider, List<Restaurant> filteredRest) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final sectionTitleColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final countColor = isDark ? const Color(0xFFA1A1AA) : const Color(0xFF64748B);
+
     return ListView(
       padding: const EdgeInsets.symmetric(vertical: 8),
       children: [
@@ -334,12 +373,12 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Catégories',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
-                  color: Colors.white,
+                  color: sectionTitleColor,
                 ),
               ),
               if (provider.selectedCategory != 'all')
@@ -368,20 +407,20 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Restaurants',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
-                  color: Colors.white,
+                  color: sectionTitleColor,
                 ),
               ),
               Text(
                 '${filteredRest.length} établissements disponibles',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFFA1A1AA),
+                  color: countColor,
                 ),
               ),
             ],
@@ -727,6 +766,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Categories Grid
   Widget _buildCategoryGrid(BuildContext context, FASTProvider provider) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final inactiveBg = isDark ? const Color(0xFF18181B) : Colors.white;
+    final inactiveBorder = isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0);
+    final inactiveTextColor = isDark ? const Color(0xFFA1A1AA) : const Color(0xFF475569);
+
     return SizedBox(
       height: 40,
       child: ListView.builder(
@@ -743,12 +787,21 @@ class _HomeScreenState extends State<HomeScreen> {
               margin: const EdgeInsets.only(right: 8),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
-                color: isActive ? const Color(0xFFF59E0B) : const Color(0xFF18181B),
+                color: isActive ? const Color(0xFFF59E0B) : inactiveBg,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: isActive ? const Color(0xFFF59E0B) : const Color(0xFF3F3F46),
+                  color: isActive ? const Color(0xFFF59E0B) : inactiveBorder,
                   width: 1,
                 ),
+                boxShadow: (!isActive && !isDark)
+                    ? [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.03),
+                          blurRadius: 4,
+                          offset: const Offset(0, 1),
+                        ),
+                      ]
+                    : null,
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -760,7 +813,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
-                      color: isActive ? const Color(0xFF09090B) : const Color(0xFFA1A1AA),
+                      color: isActive ? const Color(0xFF09090B) : inactiveTextColor,
                     ),
                   ),
                 ],
@@ -774,7 +827,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Category-colored banner placeholder — used when restaurant has no banner image
   Widget _buildBannerPlaceholder(Restaurant rest) {
-    final colors = _categoryColors(rest.category);
+    final colors = _categoryColors(rest.category, rest.name);
     return Container(
       height: 180,
       width: double.infinity,
@@ -787,7 +840,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       child: Center(
         child: Text(
-          _categoryEmoji(rest.category),
+          _categoryEmoji(rest.category, rest.name),
           style: const TextStyle(fontSize: 56),
         ),
       ),
@@ -811,25 +864,27 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  List<Color> _categoryColors(String category) {
-    final c = category.toLowerCase();
-    if (c.contains('burger')) return [const Color(0xFF7C2D12), const Color(0xFF92400E)];
-    if (c.contains('pizza')) return [const Color(0xFF7F1D1D), const Color(0xFF991B1B)];
-    if (c.contains('sushi')) return [const Color(0xFF0C4A6E), const Color(0xFF075985)];
-    if (c.contains('taco') || c.contains('mexic')) return [const Color(0xFF365314), const Color(0xFF3F6212)];
-    if (c.contains('salad') || c.contains('health')) return [const Color(0xFF14532D), const Color(0xFF166534)];
-    if (c.contains('bistro') || c.contains('french')) return [const Color(0xFF1E3A5F), const Color(0xFF1E40AF)];
-    return [const Color(0xFF18181B), const Color(0xFF27272A)];
+  List<Color> _categoryColors(String category, [String name = '']) {
+    final s = '${category.toLowerCase()} ${name.toLowerCase()}';
+    if (s.contains('burger')) return [const Color(0xFF9A3412), const Color(0xFFD97706)];
+    if (s.contains('pizza') || s.contains('italien')) return [const Color(0xFF991B1B), const Color(0xFFDC2626)];
+    if (s.contains('sushi') || s.contains('asiat') || s.contains('japan') || s.contains('chine')) return [const Color(0xFF0369A1), const Color(0xFF0284C7)];
+    if (s.contains('taco') || s.contains('mexic')) return [const Color(0xFF4D7C0F), const Color(0xFF65A30D)];
+    if (s.contains('salad') || s.contains('health') || s.contains('vegan')) return [const Color(0xFF15803D), const Color(0xFF16A34A)];
+    if (s.contains('bistro') || s.contains('french') || s.contains('petite')) return [const Color(0xFF1E40AF), const Color(0xFF3B82F6)];
+    if (s.contains('dessert') || s.contains('patiss') || s.contains('sucr') || s.contains('crepe')) return [const Color(0xFF9333EA), const Color(0xFFA855F7)];
+    return [const Color(0xFF374151), const Color(0xFF4B5563)];
   }
 
-  String _categoryEmoji(String category) {
-    final c = category.toLowerCase();
-    if (c.contains('burger')) return '🍔';
-    if (c.contains('pizza')) return '🍕';
-    if (c.contains('sushi')) return '🍣';
-    if (c.contains('taco') || c.contains('mexic')) return '🌮';
-    if (c.contains('salad') || c.contains('health')) return '🥗';
-    if (c.contains('bistro') || c.contains('french')) return '🥘';
+  String _categoryEmoji(String category, [String name = '']) {
+    final s = '${category.toLowerCase()} ${name.toLowerCase()}';
+    if (s.contains('burger')) return '🍔';
+    if (s.contains('pizza') || s.contains('italien')) return '🍕';
+    if (s.contains('sushi') || s.contains('asiat') || s.contains('japan') || s.contains('chine')) return '🍣';
+    if (s.contains('taco') || s.contains('mexic')) return '🌮';
+    if (s.contains('salad') || s.contains('health') || s.contains('vegan')) return '🥗';
+    if (s.contains('bistro') || s.contains('french') || s.contains('petite')) return '🥘';
+    if (s.contains('dessert') || s.contains('patiss') || s.contains('sucr') || s.contains('crepe')) return '🍰';
     return '🍽️';
   }
 
