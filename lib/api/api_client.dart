@@ -9,7 +9,9 @@ class ApiClient {
   factory ApiClient() => _instance;
   ApiClient._internal();
 
-  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+  );
   static const String _tokenKey = 'fast_api_token';
 
   String? _token;
@@ -18,7 +20,13 @@ class ApiClient {
   static void Function()? onUnauthorized;
 
   Future<void> init() async {
-    _token = await _secureStorage.read(key: _tokenKey);
+    try {
+      _token = await _secureStorage
+          .read(key: _tokenKey)
+          .timeout(const Duration(seconds: 3), onTimeout: () => null);
+    } catch (_) {
+      _token = null;
+    }
   }
 
   bool get isAuthenticated => _token != null && _token!.isNotEmpty;

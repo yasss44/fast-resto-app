@@ -168,45 +168,68 @@ class _FASTAppState extends State<FASTApp> with WidgetsBindingObserver {
   }
 
   Future<void> _initApp() async {
-    final auth = context.read<AuthProvider>();
-    final prefs = await SharedPreferences.getInstance();
-    _onboardingDone = prefs.getBool('fast_onboarding_done') ?? false;
+    final startTime = DateTime.now();
+    try {
+      final auth = context.read<AuthProvider>();
+      final prefs = await SharedPreferences.getInstance().timeout(
+        const Duration(seconds: 2),
+        onTimeout: () => throw TimeoutException('Prefs timeout'),
+      );
+      _onboardingDone = prefs.getBool('fast_onboarding_done') ?? false;
 
-    if (!mounted) return;
+      if (!mounted) return;
 
-    // Sync theme dark pref for legacy reads
-    final fastProv = context.read<FASTProvider>();
-    if (prefs.containsKey('fast_theme_dark')) {
-      final isDark = prefs.getBool('fast_theme_dark') ?? true;
-      await fastProv.setThemeMode(isDark ? ThemeMode.dark : ThemeMode.light);
-    }
+      // Sync theme dark pref for legacy reads
+      final fastProv = context.read<FASTProvider>();
+      if (prefs.containsKey('fast_theme_dark')) {
+        final isDark = prefs.getBool('fast_theme_dark') ?? true;
+        await fastProv.setThemeMode(isDark ? ThemeMode.dark : ThemeMode.light);
+      }
 
-    // Connect 401 handler to trigger logout
-    ApiClient.onUnauthorized = () {
-      auth.logout();
-    };
+      // Connect 401 handler to trigger logout
+      ApiClient.onUnauthorized = () {
+        auth.logout();
+      };
 
-    await auth.autoLogin();
+      // Attempt auto-login with timeout
+      await auth.autoLogin().timeout(
+        const Duration(seconds: 4),
+        onTimeout: () {},
+      );
 
-    // Sync user data from AuthProvider to FASTProvider on cold start
-    if (auth.isLoggedIn && mounted) {
-      final user = auth.user;
-      if (user != null) {
-        fastProv.syncFromAuth(
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          phone: user.phone,
-          points: user.points,
+      // Sync user data from AuthProvider to FASTProvider on cold start
+      if (auth.isLoggedIn && mounted) {
+        final user = auth.user;
+        if (user != null) {
+          fastProv.syncFromAuth(
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            points: user.points,
+          );
+        }
+        // Load API data asynchronously (non-blocking)
+        fastProv.loadFromApi();
+      }
+
+      if (mounted) {
+        await _handleStripeReturn().timeout(
+          const Duration(seconds: 1),
+          onTimeout: () {},
         );
       }
-      // Load restaurants, orders, notifications from API
-      fastProv.loadFromApi();
-    }
-
-    if (mounted) {
-      await _handleStripeReturn();
-      setState(() => _initialized = true);
+    } catch (_) {
+      // Gracefully continue to login/role selection on error
+    } finally {
+      // Ensure at least 600ms of branded splash for smooth UX
+      final elapsed = DateTime.now().difference(startTime).inMilliseconds;
+      if (elapsed < 600) {
+        await Future.delayed(Duration(milliseconds: 600 - elapsed));
+      }
+      if (mounted) {
+        setState(() => _initialized = true);
+      }
     }
   }
 
@@ -259,10 +282,73 @@ class _SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Color(0xFF09090B),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = isDark ? const Color(0xFF09090B) : const Color(0xFFFAFAFA);
+    final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
+
+    return Scaffold(
+      backgroundColor: bg,
       body: Center(
-        child: CircularProgressIndicator(color: Color(0xFFF59E0B)),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Logo Badge
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF59E0B),
+                borderRadius: BorderRadius.circular(22),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFF59E0B).withValues(alpha: 0.35),
+                    blurRadius: 24,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.bolt_rounded,
+                size: 48,
+                color: Color(0xFF09090B),
+              ),
+            ),
+            const SizedBox(height: 20),
+            // App Title
+            Text(
+              'FAST',
+              style: TextStyle(
+                fontWeight: FontWeight.w900,
+                fontSize: 28,
+                letterSpacing: 2.0,
+                color: textColor,
+              ),
+            ),
+            const SizedBox(height: 6),
+            // Tagline
+            const Text(
+              'Chaque minute compte',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFFF59E0B),
+                letterSpacing: 0.5,
+              ),
+            ),
+            const SizedBox(height: 48),
+            // Subtle progress indicator
+            SizedBox(
+              width: 28,
+              height: 28,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  const Color(0xFFF59E0B).withValues(alpha: 0.8),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

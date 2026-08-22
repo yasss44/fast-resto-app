@@ -30,7 +30,9 @@ class AuthProvider extends ChangeNotifier {
     }
 
     try {
-      final me = await AuthService().getMe();
+      final me = await AuthService()
+          .getMe()
+          .timeout(const Duration(seconds: 4));
       _user = me;
       _state = AuthState.authenticated;
     } catch (_) {

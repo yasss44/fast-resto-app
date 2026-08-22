@@ -1,7 +1,7 @@
 class ApiConfig {
   // Production backend (Vercel)
   static const String baseUrl = 'https://backend-lovat-xi-0axv990rct.vercel.app/api';
-  static Duration timeout = const Duration(seconds: 90);
+  static Duration timeout = const Duration(seconds: 15);
 
   // Auth
   static const String login = '/auth/login';
