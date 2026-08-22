@@ -39,62 +39,65 @@ class _HomeScreenState extends State<HomeScreen> {
         Column(
           children: [
             // Search Bar (full width — no ASAP pill)
-            Container(
-              color: const Color(0xFF09090B),
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      // Search field — full width
-                      Expanded(
-                        child: Focus(
-                          onFocusChange: (focus) {
-                            setState(() {
-                              _isFocusingSearch = focus;
-                            });
-                          },
-                          child: TextField(
-                            controller: _searchController,
-                            onChanged: (val) => provider.setKeyword(val),
-                            style: const TextStyle(fontSize: 13, color: Colors.white),
-                            decoration: InputDecoration(
-                              hintText: 'Rechercher des cuisines, des plats, des spécialités...',
-                              hintStyle: const TextStyle(color: Color(0xFF71717A)),
-                              prefixIcon: const Icon(Icons.search, color: Color(0xFF71717A), size: 18),
-                              suffixIcon: provider.searchKeyword.isNotEmpty
-                                  ? IconButton(
-                                      onPressed: () {
-                                        provider.setKeyword('');
-                                        _searchController.clear();
-                                      },
-                                      icon: const Icon(Icons.close, color: Color(0xFF71717A), size: 16),
-                                    )
-                                  : null,
-                              contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                              filled: true,
-                              fillColor: const Color(0xFF18181B),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: Color(0xFF27272A)),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: Color(0xFF27272A)),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: Color(0xFFF59E0B)),
+            Builder(builder: (context) {
+              final isDark = Theme.of(context).brightness == Brightness.dark;
+              return Container(
+                color: isDark ? const Color(0xFF09090B) : Colors.white,
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        // Search field — full width
+                        Expanded(
+                          child: Focus(
+                            onFocusChange: (focus) {
+                              setState(() {
+                                _isFocusingSearch = focus;
+                              });
+                            },
+                            child: TextField(
+                              controller: _searchController,
+                              onChanged: (val) => provider.setKeyword(val),
+                              style: TextStyle(fontSize: 13, color: isDark ? Colors.white : const Color(0xFF0F172A)),
+                              decoration: InputDecoration(
+                                hintText: 'Rechercher des cuisines, des plats, des spécialités...',
+                                hintStyle: const TextStyle(color: Color(0xFF71717A)),
+                                prefixIcon: const Icon(Icons.search, color: Color(0xFF71717A), size: 18),
+                                suffixIcon: provider.searchKeyword.isNotEmpty
+                                    ? IconButton(
+                                        onPressed: () {
+                                          provider.setKeyword('');
+                                          _searchController.clear();
+                                        },
+                                        icon: const Icon(Icons.close, color: Color(0xFF71717A), size: 16),
+                                      )
+                                    : null,
+                                contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                                filled: true,
+                                fillColor: isDark ? const Color(0xFF18181B) : const Color(0xFFF1F5F9),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(color: Color(0xFFF59E0B)),
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            }),
 
             // Autocomplete Suggestions Panel OR Main Page Content
             Expanded(
@@ -769,6 +772,67 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // Category-colored banner placeholder — used when restaurant has no banner image
+  Widget _buildBannerPlaceholder(Restaurant rest) {
+    final colors = _categoryColors(rest.category);
+    return Container(
+      height: 180,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: colors,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Center(
+        child: Text(
+          _categoryEmoji(rest.category),
+          style: const TextStyle(fontSize: 56),
+        ),
+      ),
+    );
+  }
+
+  // Letter-based logo placeholder — amber circle with first letter
+  Widget _buildLogoPlaceholder(String name) {
+    return Container(
+      color: const Color(0xFFF59E0B),
+      child: Center(
+        child: Text(
+          name.isNotEmpty ? name[0].toUpperCase() : 'R',
+          style: const TextStyle(
+            fontWeight: FontWeight.w900,
+            fontSize: 18,
+            color: Color(0xFF09090B),
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<Color> _categoryColors(String category) {
+    final c = category.toLowerCase();
+    if (c.contains('burger')) return [const Color(0xFF7C2D12), const Color(0xFF92400E)];
+    if (c.contains('pizza')) return [const Color(0xFF7F1D1D), const Color(0xFF991B1B)];
+    if (c.contains('sushi')) return [const Color(0xFF0C4A6E), const Color(0xFF075985)];
+    if (c.contains('taco') || c.contains('mexic')) return [const Color(0xFF365314), const Color(0xFF3F6212)];
+    if (c.contains('salad') || c.contains('health')) return [const Color(0xFF14532D), const Color(0xFF166534)];
+    if (c.contains('bistro') || c.contains('french')) return [const Color(0xFF1E3A5F), const Color(0xFF1E40AF)];
+    return [const Color(0xFF18181B), const Color(0xFF27272A)];
+  }
+
+  String _categoryEmoji(String category) {
+    final c = category.toLowerCase();
+    if (c.contains('burger')) return '🍔';
+    if (c.contains('pizza')) return '🍕';
+    if (c.contains('sushi')) return '🍣';
+    if (c.contains('taco') || c.contains('mexic')) return '🌮';
+    if (c.contains('salad') || c.contains('health')) return '🥗';
+    if (c.contains('bistro') || c.contains('french')) return '🥘';
+    return '🍽️';
+  }
+
   // Restaurant card widget
   Widget _buildRestaurantCard(BuildContext context, FASTProvider provider, Restaurant rest) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -807,16 +871,16 @@ class _HomeScreenState extends State<HomeScreen> {
             // Hero image — taller
             Stack(
               children: [
-                Image.network(
-                  rest.image,
-                  height: 180,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    height: 180,
-                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
-                  ),
-                ),
+                rest.image.isNotEmpty
+                    ? Image.network(
+                        rest.image,
+                        height: 180,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            _buildBannerPlaceholder(rest),
+                      )
+                    : _buildBannerPlaceholder(rest),
                 // Bottom gradient fade into card color
                 Positioned.fill(
                   child: DecoratedBox(
@@ -918,22 +982,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     clipBehavior: Clip.antiAlias,
-                    child: Image.network(
-                      rest.logo,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Container(
-                        color: const Color(0xFFF59E0B),
-                        child: Center(
-                          child: Text(
-                            rest.name.isNotEmpty ? rest.name[0].toUpperCase() : 'R',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w900,
-                              color: Color(0xFF09090B),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
+                    child: rest.logo.isNotEmpty
+                        ? Image.network(
+                            rest.logo,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                _buildLogoPlaceholder(rest.name),
+                          )
+                        : _buildLogoPlaceholder(rest.name),
                   ),
                   Expanded(
                     child: Column(

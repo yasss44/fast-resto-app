@@ -249,17 +249,7 @@ class Restaurant {
     this.deliveryEnabled = true,
     this.deliveryFee = 2.99,
     this.deliveryRadiusKm = 5.0,
-  }) : logo = (logo != null && logo.isNotEmpty) ? logo : _getDefaultLogo(category, image);
-
-  static String _getDefaultLogo(String cat, String fallbackImg) {
-    final c = cat.toLowerCase();
-    if (c.contains('burger')) return 'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=200&q=80';
-    if (c.contains('pizza')) return 'https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?auto=format&fit=crop&w=200&q=80';
-    if (c.contains('sushi')) return 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=200&q=80';
-    if (c.contains('taco') || c.contains('mexic')) return 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=200&q=80';
-    if (c.contains('salad') || c.contains('health')) return 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=200&q=80';
-    return fallbackImg.isNotEmpty ? fallbackImg : 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=200&q=80';
-  }
+  }) : logo = (logo != null && logo.isNotEmpty) ? logo : '';
 
   Map<String, dynamic> toJson() => {
         'id': id,

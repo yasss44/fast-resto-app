@@ -101,34 +101,47 @@ class _CommandesScreenState extends State<CommandesScreen> with TickerProviderSt
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<FASTProvider>(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = isDark ? const Color(0xFF09090B) : const Color(0xFFF8F9FA);
+    final surface = isDark ? const Color(0xFF18181B) : Colors.white;
+    final borderColor = isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0);
+    final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF09090B),
+      backgroundColor: bg,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF09090B),
+        backgroundColor: surface,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         automaticallyImplyLeading: false,
-        title: const Text(
+        title: Text(
           'Commandes',
           style: TextStyle(
-            color: Colors.white,
+            color: titleColor,
             fontWeight: FontWeight.w900,
             fontSize: 18,
           ),
         ),
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: const Color(0xFFF59E0B),
-          indicatorWeight: 2,
-          labelColor: const Color(0xFFF59E0B),
-          unselectedLabelColor: const Color(0xFF71717A),
-          labelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-          unselectedLabelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-          tabs: const [
-            Tab(text: 'Suivi en cours'),
-            Tab(text: 'Historique'),
-          ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(49),
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: borderColor)),
+            ),
+            child: TabBar(
+              controller: _tabController,
+              indicatorColor: const Color(0xFFF59E0B),
+              indicatorWeight: 2,
+              labelColor: const Color(0xFFF59E0B),
+              unselectedLabelColor: const Color(0xFF71717A),
+              labelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+              unselectedLabelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+              tabs: const [
+                Tab(text: 'Suivi en cours'),
+                Tab(text: 'Historique'),
+              ],
+            ),
+          ),
         ),
       ),
       body: TabBarView(

@@ -51,6 +51,9 @@ class _CartScreenState extends State<CartScreen> {
     final rest = provider.selectedRestaurant;
 
     if (cart.isEmpty || rest == null) {
+      final isDark = Theme.of(context).brightness == Brightness.dark;
+      final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
+      final subColor = isDark ? const Color(0xFFA1A1AA) : const Color(0xFF64748B);
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(32),
@@ -59,14 +62,14 @@ class _CartScreenState extends State<CartScreen> {
             children: [
               const Text('🛒', style: TextStyle(fontSize: 48)),
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 'Votre panier est vide',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: textColor),
               ),
               const SizedBox(height: 6),
-              const Text(
+              Text(
                 'Ajoutez de bons plats d\'un restaurant local pour passer commande !',
-                style: TextStyle(fontSize: 11, color: Color(0xFFA1A1AA)),
+                style: TextStyle(fontSize: 11, color: subColor),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
@@ -173,17 +176,20 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Widget _buildCartItemsCard(BuildContext context, FASTProvider provider, List<CartItem> cart) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surface = isDark ? const Color(0xFF18181B) : Colors.white;
+    final borderColor = isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0);
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF18181B),
+        color: surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF27272A)),
+        border: Border.all(color: borderColor),
       ),
       child: ListView.separated(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: cart.length,
-        separatorBuilder: (context, index) => const Divider(color: Color(0xFF27272A), height: 1),
+        separatorBuilder: (context, index) => Divider(color: borderColor, height: 1),
         itemBuilder: (context, index) {
           final item = cart[index];
           return Padding(
@@ -197,7 +203,7 @@ class _CartScreenState extends State<CartScreen> {
                     children: [
                       Text(
                         item.menuItem.name,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white),
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: isDark ? Colors.white : const Color(0xFF0F172A)),
                       ),
                       if (item.selectedOptions.isNotEmpty) ...[
                         const SizedBox(height: 4),
@@ -220,7 +226,7 @@ class _CartScreenState extends State<CartScreen> {
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF09090B),
+                            color: isDark ? const Color(0xFF09090B) : const Color(0xFFFEF3C7),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.2)),
                           ),
@@ -248,7 +254,7 @@ class _CartScreenState extends State<CartScreen> {
                     // quantity adjustments
                     Container(
                       decoration: BoxDecoration(
-                        color: const Color(0xFF09090B),
+                        color: isDark ? const Color(0xFF09090B) : const Color(0xFFF1F5F9),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(

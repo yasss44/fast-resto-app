@@ -229,15 +229,22 @@ class _GroupScreenState extends State<GroupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = isDark ? const Color(0xFF09090B) : const Color(0xFFF8F9FA);
+    final surface = isDark ? const Color(0xFF18181B) : Colors.white;
+    final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
+
     if (_loading) {
       return const Center(child: CircularProgressIndicator(color: Color(0xFFF59E0B)));
     }
     return Scaffold(
-      backgroundColor: const Color(0xFF09090B),
+      backgroundColor: bg,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: const Color(0xFF09090B),
-        title: const Text('Commande en groupe', style: TextStyle(fontWeight: FontWeight.w900)),
+        backgroundColor: surface,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        title: Text('Commande en groupe', style: TextStyle(fontWeight: FontWeight.w900, color: titleColor)),
       ),
       body: RefreshIndicator(
         onRefresh: () async {

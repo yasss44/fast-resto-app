@@ -25,16 +25,18 @@ class RestaurantScreen extends StatelessWidget {
         // Restaurant Banner Header
         Stack(
           children: [
-              Image.network(
-                rest.image,
-                height: 220,
-              width: double.infinity,
-              cacheWidth: 500,
-              fit: BoxFit.cover,
-              filterQuality: FilterQuality.low,
-              errorBuilder: (context, error, stackTrace) =>
-                  Container(height: 160, color: Colors.grey),
-            ),
+              rest.image.isNotEmpty
+                ? Image.network(
+                    rest.image,
+                    height: 220,
+                    width: double.infinity,
+                    cacheWidth: 500,
+                    fit: BoxFit.cover,
+                    filterQuality: FilterQuality.low,
+                    errorBuilder: (context, error, stackTrace) =>
+                        _buildBannerPlaceholder(rest),
+                  )
+                : _buildBannerPlaceholder(rest),
             // Gradient Overlay
             Positioned.fill(
               child: Container(
@@ -111,22 +113,14 @@ class RestaurantScreen extends StatelessWidget {
                           border: Border.all(color: Colors.white, width: 1.5),
                         ),
                         clipBehavior: Clip.antiAlias,
-                        child: Image.network(
-                          rest.logo,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => Container(
-                            color: const Color(0xFFF59E0B),
-                            child: Center(
-                              child: Text(
-                                rest.name.isNotEmpty ? rest.name[0].toUpperCase() : 'R',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w900,
-                                  color: Color(0xFF09090B),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
+                        child: rest.logo.isNotEmpty
+                            ? Image.network(
+                                rest.logo,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    _buildLogoPlaceholder(rest.name),
+                              )
+                            : _buildLogoPlaceholder(rest.name),
                       ),
                       Expanded(
                         child: Text(
@@ -846,5 +840,64 @@ class RestaurantScreen extends StatelessWidget {
         );
       },
     );
+  }
+
+  Widget _buildBannerPlaceholder(Restaurant rest) {
+    final colors = _categoryColors(rest.category);
+    return Container(
+      height: 220,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: colors,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Center(
+        child: Text(
+          _categoryEmoji(rest.category),
+          style: const TextStyle(fontSize: 72),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLogoPlaceholder(String name) {
+    return Container(
+      color: const Color(0xFFF59E0B),
+      child: Center(
+        child: Text(
+          name.isNotEmpty ? name[0].toUpperCase() : 'R',
+          style: const TextStyle(
+            fontWeight: FontWeight.w900,
+            fontSize: 16,
+            color: Color(0xFF09090B),
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<Color> _categoryColors(String category) {
+    final c = category.toLowerCase();
+    if (c.contains('burger')) return [const Color(0xFF7C2D12), const Color(0xFF92400E)];
+    if (c.contains('pizza')) return [const Color(0xFF7F1D1D), const Color(0xFF991B1B)];
+    if (c.contains('sushi')) return [const Color(0xFF0C4A6E), const Color(0xFF075985)];
+    if (c.contains('taco') || c.contains('mexic')) return [const Color(0xFF365314), const Color(0xFF3F6212)];
+    if (c.contains('salad') || c.contains('health')) return [const Color(0xFF14532D), const Color(0xFF166534)];
+    if (c.contains('bistro') || c.contains('french')) return [const Color(0xFF1E3A5F), const Color(0xFF1E40AF)];
+    return [const Color(0xFF18181B), const Color(0xFF27272A)];
+  }
+
+  String _categoryEmoji(String category) {
+    final c = category.toLowerCase();
+    if (c.contains('burger')) return '🍔';
+    if (c.contains('pizza')) return '🍕';
+    if (c.contains('sushi')) return '🍣';
+    if (c.contains('taco') || c.contains('mexic')) return '🌮';
+    if (c.contains('salad') || c.contains('health')) return '🥗';
+    if (c.contains('bistro') || c.contains('french')) return '🥘';
+    return '🍽️';
   }
 }

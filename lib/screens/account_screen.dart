@@ -33,21 +33,26 @@ class _AccountScreenState extends State<AccountScreen>
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<FASTProvider>(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = isDark ? const Color(0xFF09090B) : const Color(0xFFF8F9FA);
+    final surface = isDark ? const Color(0xFF18181B) : Colors.white;
+    final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final iconColor = isDark ? const Color(0xFFE4E4E7) : const Color(0xFF0F172A);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF09090B),
+      backgroundColor: bg,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF09090B),
+        backgroundColor: surface,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
-          icon: const Icon(Icons.close, color: Color(0xFFE4E4E7)),
+          icon: Icon(Icons.close, color: iconColor),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Text(
+        title: Text(
           'Mon compte',
           style: TextStyle(
-            color: Colors.white,
+            color: titleColor,
             fontWeight: FontWeight.w800,
             fontSize: 16,
           ),
