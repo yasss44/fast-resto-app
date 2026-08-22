@@ -601,40 +601,61 @@ class _CommandesScreenState extends State<CommandesScreen> with TickerProviderSt
   }
 
   Widget _buildDeliveryTrackingCard(Order order) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF18181B),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF27272A)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.delivery_dining, color: Color(0xFF10B981), size: 28),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  _deliveryStatusLabel ?? _deliveryStatusToLabel(order.deliveryStatus),
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+    return Builder(builder: (context) {
+      final isDark = Theme.of(context).brightness == Brightness.dark;
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF18181B) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.delivery_dining, color: Color(0xFF10B981), size: 28),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    _deliveryStatusLabel ?? _deliveryStatusToLabel(order.deliveryStatus),
+                    style: TextStyle(
+                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            if (_deliveryDriverName != null) ...[
+              const SizedBox(height: 10),
+              Text(
+                'Livreur : $_deliveryDriverName',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isDark ? const Color(0xFFA1A1AA) : const Color(0xFF64748B),
                 ),
               ),
             ],
-          ),
-          if (_deliveryDriverName != null) ...[
-            const SizedBox(height: 10),
-            Text('Livreur : $_deliveryDriverName', style: const TextStyle(fontSize: 12, color: Color(0xFFA1A1AA))),
+            if (order.deliveryAddress.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(
+                '📍 ${order.deliveryAddress}',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: isDark ? const Color(0xFF71717A) : const Color(0xFF64748B),
+                ),
+              ),
+            ],
           ],
-          if (order.deliveryAddress.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            Text('📍 ${order.deliveryAddress}', style: const TextStyle(fontSize: 11, color: Color(0xFF71717A))),
-          ],
-        ],
-      ),
-    );
+        ),
+      );
+    });
   }
 
   void _stopLocationTracking() {
@@ -845,31 +866,40 @@ class _CommandesScreenState extends State<CommandesScreen> with TickerProviderSt
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF18181B),
+      backgroundColor: Colors.transparent,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        return Padding(
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final sheetBg = isDark ? const Color(0xFF18181B) : Colors.white;
+        final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
+        final subColor = isDark ? const Color(0xFFA1A1AA) : const Color(0xFF64748B);
+        final borderColor = isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0);
+        return Container(
+          decoration: BoxDecoration(
+            color: sheetBg,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          ),
           padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Row(
+              Row(
                 children: [
-                  Icon(Icons.warning, color: Color(0xFFEF4444)),
-                  SizedBox(width: 8),
+                  const Icon(Icons.warning, color: Color(0xFFEF4444)),
+                  const SizedBox(width: 8),
                   Text(
                     'Politique d\'annulation',
-                    style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: Colors.white),
+                    style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: titleColor),
                   ),
                 ],
               ),
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 'Chez FAST, notre politique d\'annulation est transparente et simple. Pas de petits caractères :',
-                style: TextStyle(fontSize: 11, color: Color(0xFFA1A1AA), height: 1.4),
+                style: TextStyle(fontSize: 11, color: subColor, height: 1.4),
               ),
               const SizedBox(height: 16),
 
@@ -877,10 +907,14 @@ class _CommandesScreenState extends State<CommandesScreen> with TickerProviderSt
                 padding: const EdgeInsets.all(12),
                 margin: const EdgeInsets.only(bottom: 8),
                 decoration: BoxDecoration(
-                  color: !prepStarted ? const Color(0xFF0C1D1A) : const Color(0xFF09090B),
+                  color: !prepStarted
+                      ? (isDark ? const Color(0xFF0C1D1A) : const Color(0xFFECFDF5))
+                      : (isDark ? const Color(0xFF09090B) : const Color(0xFFF9FAFB)),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                    color: !prepStarted ? const Color(0xFF10B981).withValues(alpha: 0.3) : const Color(0xFF27272A),
+                    color: !prepStarted
+                        ? const Color(0xFF10B981).withValues(alpha: 0.3)
+                        : borderColor,
                   ),
                 ),
                 child: Row(
@@ -896,14 +930,14 @@ class _CommandesScreenState extends State<CommandesScreen> with TickerProviderSt
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Cas 1 : Annulation avant préparation',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.white),
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: titleColor),
                           ),
                           const SizedBox(height: 2),
-                          const Text(
+                          Text(
                             'Remboursement intégral (hors frais de service 1,50 € utilisés pour le traitement).',
-                            style: TextStyle(fontSize: 10, color: Color(0xFFA1A1AA), height: 1.3),
+                            style: TextStyle(fontSize: 10, color: subColor, height: 1.3),
                           ),
                           if (!prepStarted) ...[
                             const SizedBox(height: 6),
@@ -922,10 +956,14 @@ class _CommandesScreenState extends State<CommandesScreen> with TickerProviderSt
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: prepStarted ? const Color(0xFF2D1616) : const Color(0xFF09090B),
+                  color: prepStarted
+                      ? (isDark ? const Color(0xFF2D1616) : const Color(0xFFFEF2F2))
+                      : (isDark ? const Color(0xFF09090B) : const Color(0xFFF9FAFB)),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                    color: prepStarted ? const Color(0xFFEF4444).withValues(alpha: 0.3) : const Color(0xFF27272A),
+                    color: prepStarted
+                        ? const Color(0xFFEF4444).withValues(alpha: 0.3)
+                        : borderColor,
                   ),
                 ),
                 child: Row(
@@ -941,14 +979,14 @@ class _CommandesScreenState extends State<CommandesScreen> with TickerProviderSt
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Cas 2 : Annulation après préparation',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.white),
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: titleColor),
                           ),
                           const SizedBox(height: 2),
-                          const Text(
+                          Text(
                             'Débit total appliqué. La cuisine a déjà utilisé les ingrédients frais pour votre repas.',
-                            style: TextStyle(fontSize: 10, color: Color(0xFFA1A1AA), height: 1.3),
+                            style: TextStyle(fontSize: 10, color: subColor, height: 1.3),
                           ),
                           if (prepStarted) ...[
                             const SizedBox(height: 6),
@@ -972,11 +1010,11 @@ class _CommandesScreenState extends State<CommandesScreen> with TickerProviderSt
                     child: OutlinedButton(
                       onPressed: () => Navigator.of(context).pop(),
                       style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Color(0xFF27272A)),
+                        side: BorderSide(color: borderColor),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                       ),
-                      child: const Text('Garder la commande', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      child: Text('Garder la commande', style: TextStyle(color: titleColor, fontWeight: FontWeight.bold)),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -1044,14 +1082,15 @@ class _CommandesScreenState extends State<CommandesScreen> with TickerProviderSt
   }
 
   Widget _buildRatingCard(BuildContext context, FASTProvider provider, Order order) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xFF18181B),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF18181B) : Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         border: Border(
-          top: BorderSide(color: Color(0xFF27272A)),
-          left: BorderSide(color: Color(0xFF27272A)),
-          right: BorderSide(color: Color(0xFF27272A)),
+          top: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
+          left: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
+          right: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)),
         ),
       ),
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
@@ -1605,17 +1644,19 @@ class MapRoadmapPainter extends CustomPainter {
   final double progress;
   final double pulse;
   final OrderStatus orderStatus;
+  final bool isDark;
 
   MapRoadmapPainter({
     required this.progress,
     required this.pulse,
     required this.orderStatus,
+    this.isDark = true,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     final bgPaint = Paint()
-      ..color = const Color(0xFF0E0E11)
+      ..color = isDark ? const Color(0xFF0E0E11) : const Color(0xFFF1F5F9)
       ..style = PaintingStyle.fill;
     canvas.drawRect(Offset.zero & size, bgPaint);
 
@@ -1648,14 +1689,14 @@ class MapRoadmapPainter extends CustomPainter {
     path.quadraticBezierTo(controlPt3.dx, controlPt3.dy, endPt.dx, endPt.dy);
 
     final roadPaint = Paint()
-      ..color = const Color(0xFF18181B)
+      ..color = isDark ? const Color(0xFF18181B) : const Color(0xFFCBD5E1)
       ..strokeWidth = 8.0
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
     canvas.drawPath(path, roadPaint);
 
     final roadBorderPaint = Paint()
-      ..color = const Color(0xFF27272A)
+      ..color = isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0)
       ..strokeWidth = 9.0
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;

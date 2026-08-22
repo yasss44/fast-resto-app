@@ -151,12 +151,19 @@ class _AuthScreenState extends State<AuthScreen>
         );
       },
       child: Scaffold(
-        backgroundColor: const Color(0xFF09090B),
+        backgroundColor: Theme.of(context).brightness == Brightness.dark
+            ? const Color(0xFF09090B)
+            : const Color(0xFFFAFAFA),
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            icon: Icon(
+              Icons.arrow_back,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white
+                  : const Color(0xFF0F172A),
+            ),
             onPressed: () {
               if (Navigator.canPop(context)) {
                 Navigator.pop(context);
@@ -174,7 +181,12 @@ class _AuthScreenState extends State<AuthScreen>
                 : widget.initialRole == 'LIVREUR'
                     ? 'Espace Livreur'
                     : 'Espace Client',
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white
+                  : const Color(0xFF0F172A),
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
         body: SafeArea(
@@ -186,9 +198,15 @@ class _AuthScreenState extends State<AuthScreen>
                   controller: _tabController,
                   indicatorColor: const Color(0xFFF59E0B),
                   indicatorSize: TabBarIndicatorSize.tab,
-                  dividerColor: const Color(0xFF27272A),
-                  labelColor: Colors.white,
-                  unselectedLabelColor: const Color(0xFFA1A1AA),
+                  dividerColor: Theme.of(context).brightness == Brightness.dark
+                      ? const Color(0xFF27272A)
+                      : const Color(0xFFE2E8F0),
+                  labelColor: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : const Color(0xFF0F172A),
+                  unselectedLabelColor: Theme.of(context).brightness == Brightness.dark
+                      ? const Color(0xFFA1A1AA)
+                      : const Color(0xFF64748B),
                   labelStyle: const TextStyle(
                       fontWeight: FontWeight.bold, fontSize: 15),
                   unselectedLabelStyle: const TextStyle(
@@ -486,51 +504,67 @@ class _AuthScreenState extends State<AuthScreen>
     Widget? suffix,
     String? Function(String?)? validator,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFFE4E4E7),
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          obscureText: obscureText,
-          keyboardType: keyboardType,
-          validator: validator,
-          style: const TextStyle(color: Colors.white, fontSize: 14),
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: const TextStyle(color: Color(0xFF52525B), fontSize: 14),
-            prefixIcon: Icon(icon, color: const Color(0xFF71717A), size: 18),
-            suffixIcon: suffix,
-            filled: true,
-            fillColor: const Color(0xFF18181B),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFF27272A), width: 1),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFFF59E0B), width: 1.5),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFFEF4444), width: 1),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFFEF4444), width: 1.5),
+    return Builder(builder: (context) {
+      final isDark = Theme.of(context).brightness == Brightness.dark;
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: isDark ? const Color(0xFFE4E4E7) : const Color(0xFF374151),
             ),
           ),
-        ),
-      ],
-    );
+          const SizedBox(height: 8),
+          TextFormField(
+            controller: controller,
+            obscureText: obscureText,
+            keyboardType: keyboardType,
+            validator: validator,
+            style: TextStyle(
+              color: isDark ? Colors.white : const Color(0xFF0F172A),
+              fontSize: 14,
+            ),
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: TextStyle(
+                color: isDark ? const Color(0xFF52525B) : const Color(0xFF9CA3AF),
+                fontSize: 14,
+              ),
+              prefixIcon: Icon(
+                icon,
+                color: isDark ? const Color(0xFF71717A) : const Color(0xFF9CA3AF),
+                size: 18,
+              ),
+              suffixIcon: suffix,
+              filled: true,
+              fillColor: isDark ? const Color(0xFF18181B) : const Color(0xFFF9FAFB),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(
+                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFE5E7EB),
+                  width: 1,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Color(0xFFF59E0B), width: 1.5),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Color(0xFFEF4444), width: 1),
+              ),
+              focusedErrorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Color(0xFFEF4444), width: 1.5),
+              ),
+            ),
+          ),
+        ],
+      );
+    });
   }
 }

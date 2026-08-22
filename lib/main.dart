@@ -564,9 +564,11 @@ class _MainShellState extends State<MainShell> with SingleTickerProviderStateMix
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF18181B),
+                          color: isDark ? const Color(0xFF18181B) : Colors.white,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: const Color(0xFF3F3F46)),
+                          border: Border.all(
+                            color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE2E8F0),
+                          ),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withValues(alpha: 0.35),

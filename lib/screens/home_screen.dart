@@ -451,6 +451,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Actionable Banners
   Widget _buildActionableBanners(BuildContext context, FASTProvider provider) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return SizedBox(
       height: 140,
       child: ListView(
@@ -570,9 +571,11 @@ class _HomeScreenState extends State<HomeScreen> {
               margin: const EdgeInsets.only(right: 12),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFF18181B),
+                color: isDark ? const Color(0xFF18181B) : Colors.white,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: const Color(0xFF27272A)),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0),
+                ),
               ),
               child: Stack(
                 children: [
@@ -611,10 +614,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ],
                       ),
-                      const Text(
+                      Text(
                         'Indécis ? Laissez-nous choisir votre repas.',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
                           fontWeight: FontWeight.w800,
                           fontSize: 15,
                           height: 1.2,
@@ -623,10 +626,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
+                          Text(
                             'Découverte aléatoire',
                             style: TextStyle(
-                              color: Color(0xFF71717A),
+                              color: isDark ? const Color(0xFF71717A) : const Color(0xFF64748B),
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
                             ),
@@ -669,9 +672,11 @@ class _HomeScreenState extends State<HomeScreen> {
               width: 280,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFF0C1D1A), // Dark teal/green
+                color: isDark ? const Color(0xFF0C1D1A) : const Color(0xFFECFDF5),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: const Color(0xFF1E3A34)),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF1E3A34) : const Color(0xFFD1FAE5),
+                ),
               ),
               child: Stack(
                 children: [
@@ -710,10 +715,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ],
                       ),
-                      const Text(
+                      Text(
                         'Retrait sous 15 minutes garanti.',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
                           fontWeight: FontWeight.w800,
                           fontSize: 15,
                           height: 1.2,
@@ -722,10 +727,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
+                          Text(
                             'Découvrez les sushis locaux',
                             style: TextStyle(
-                              color: Color(0xFFA1A1AA),
+                              color: isDark ? const Color(0xFFA1A1AA) : const Color(0xFF64748B),
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
                             ),
@@ -733,7 +738,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF1F2937),
+                              color: isDark ? const Color(0xFF1F2937) : const Color(0xFF0F172A),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: const Row(
@@ -1122,6 +1127,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildNoKitchens(BuildContext context, FASTProvider provider) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.all(32),
       child: Center(
@@ -1129,14 +1135,21 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             const Text('🥙', style: TextStyle(fontSize: 48)),
             const SizedBox(height: 12),
-            const Text(
+            Text(
               'Aucune cuisine trouvée',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
+              ),
             ),
             const SizedBox(height: 6),
-            const Text(
+            Text(
               'Essayez de supprimer les restrictions alimentaires ou de modifier les filtres.',
-              style: TextStyle(fontSize: 11, color: Color(0xFFA1A1AA)),
+              style: TextStyle(
+                fontSize: 11,
+                color: isDark ? const Color(0xFFA1A1AA) : const Color(0xFF64748B),
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
